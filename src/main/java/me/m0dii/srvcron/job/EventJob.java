@@ -64,11 +64,11 @@ public class EventJob
                     }
                     else
                     {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parsePlaceholder(cmd));
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd));
                     }
                 }
                 
-                Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this));
+                Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, player, world));
             }
         }.runTaskLater(SRVCron, time * 20L);
     }
@@ -81,5 +81,10 @@ public class EventJob
     public EventType getEventType()
     {
         return eventType;
+    }
+    
+    public List<String> getCommands()
+    {
+        return commands;
     }
 }

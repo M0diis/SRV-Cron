@@ -40,7 +40,7 @@ public class BungeeEventJob {
                 c = c.replace("{player}", player.getName());
 
                 ProxyServer.getInstance().getPluginManager().dispatchCommand(
-                        ProxyServer.getInstance().getConsole(), Utils.parsePlaceholder(c));
+                        ProxyServer.getInstance().getConsole(), Utils.setPlaceholders(c));
             }
         }, time, TimeUnit.SECONDS);
     }

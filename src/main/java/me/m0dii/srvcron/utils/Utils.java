@@ -13,7 +13,7 @@ public class Utils
 {
     private static final SRVCron plugin = SRVCron.getInstance();
     
-    public static String parsePlaceholder(String str, Player p)
+    public static String setPlaceholders(String str, Player p)
     {
         if (plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null)
         {
@@ -28,9 +28,9 @@ public class Utils
         return str;
     }
     
-    public static String parsePlaceholder(String str)
+    public static String setPlaceholders(String str)
     {
-        return parsePlaceholder(str, null);
+        return setPlaceholders(str, null);
     }
 
     public static String format(String text)
@@ -45,7 +45,7 @@ public class Utils
     
     public static void sendCommand(Player sender, String cmd)
     {
-        cmd = parsePlaceholder(cmd, sender);
+        cmd = setPlaceholders(cmd, sender);
         
         if(cmd.startsWith("["))
         {

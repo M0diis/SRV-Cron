@@ -193,7 +193,7 @@ public class CronJob
             }
             else
             {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parsePlaceholder(cmd));
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd));
             }
         }
         

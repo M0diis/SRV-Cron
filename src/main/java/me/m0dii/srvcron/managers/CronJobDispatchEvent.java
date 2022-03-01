@@ -5,6 +5,8 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
+
 public class CronJobDispatchEvent extends Event
 {
     private static final HandlerList HANDLERS_LIST = new HandlerList();
@@ -40,5 +42,10 @@ public class CronJobDispatchEvent extends Event
     public String getJobTime()
     {
         return cronJob.getTime();
+    }
+    
+    public List<String> getJobCommands()
+    {
+        return cronJob.getCommands();
     }
 }

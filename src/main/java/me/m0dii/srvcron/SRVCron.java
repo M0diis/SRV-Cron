@@ -5,15 +5,14 @@ import me.m0dii.srvcron.commands.TimerCommand;
 import me.m0dii.srvcron.job.CronJob;
 import me.m0dii.srvcron.job.EventJob;
 import me.m0dii.srvcron.managers.EventManager;
+import me.m0dii.srvcron.managers.StartupCommandDispatchEvent;
 import me.m0dii.srvcron.utils.EventType;
-import me.m0dii.srvcron.utils.Utils;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.CustomChart;
 import org.bstats.charts.MultiLineChart;
 import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -68,32 +67,12 @@ public class SRVCron extends JavaPlugin
         log("Finished loading metrics.");
         
         log("SRV-Cron has been loaded successfully.");
-        
-        new BukkitRunnable()
-        {
-            @Override
-            public void run()
-            {
-                log("Running startup commands...");
-                
-                for(String cmd : getStartUpCommands())
-                {
-                    if(cmd.startsWith("["))
-                    {
-                        for(Player p : Bukkit.getOnlinePlayers())
-                        {
-                            Utils.sendCommand(p, cmd);
-                        }
-                    }
-                    else
-                    {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parsePlaceholder(cmd));
-                    }
-                }
-                
-                log("Startup commands dispatched.");
-            }
-        }.runTaskLater(this, 20);
+    
+        log("Running startup commands...");
+    
+        Bukkit.getPluginManager().callEvent(new StartupCommandDispatchEvent(this));
+    
+        log("Startup commands dispatched.");
     }
     
     private void setupMetrics()

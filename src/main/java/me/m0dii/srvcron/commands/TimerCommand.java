@@ -69,7 +69,7 @@ public class TimerCommand implements CommandExecutor
             @Override
             public void run()
             {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parsePlaceholder(cmd));
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd));
             }
         }.runTaskLater(SRVCron, seconds * 20L);
     }
