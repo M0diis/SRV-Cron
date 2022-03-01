@@ -11,8 +11,8 @@
 
 ![build][buildImage] ![release][releaseImage] ![license][licenseImage]
 
-## M0-CoreCord
-Discord integration for CoreProtect plugin, supports both SQLite and MySQL databases.
+## SRV-Cron
+Scheduler, jobs, events for your server.
 
 ### Development
 Building is quite simple.
