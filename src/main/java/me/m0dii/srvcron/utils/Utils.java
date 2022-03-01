@@ -7,11 +7,11 @@ import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 
-import java.util.Calendar;
+import java.util.*;
 
 public class Utils
 {
-    private static SRVCron plugin = SRVCron.getInstance();
+    private static final SRVCron plugin = SRVCron.getInstance();
     
     public static String parsePlaceholder(String str, Player p)
     {
@@ -52,6 +52,16 @@ public class Utils
             String sendAs = cmd.substring(cmd.indexOf("["), cmd.indexOf("]") + 1).toUpperCase();
             
             cmd = cmd.substring(cmd.indexOf("]") + 2);
+            
+            if(sendAs.contains("(") && sendAs.contains(")"))
+            {
+                String cond = sendAs.substring(sendAs.indexOf("(") + 1, sendAs.indexOf(")"));
+                
+                if(!matchesFilter(sender, cond))
+                {
+                    return;
+                }
+            }
             
             if(sendAs.equalsIgnoreCase("[MESSAGE]") || sendAs.equalsIgnoreCase("[TEXT]"))
             {
@@ -126,6 +136,7 @@ public class Utils
                     }
                 }
             }
+            
             if(sendAs.startsWith("[PLAYER]"))
                 Bukkit.dispatchCommand(sender, cmd);
             if(sendAs.startsWith("[CONSOLE]"))
@@ -157,5 +168,76 @@ public class Utils
         }
     
         return cMinute.equalsIgnoreCase(minute) && cHour.equalsIgnoreCase(hour);
+    }
+    
+    public static boolean matchesFilter(Player p, String cond)
+    {
+        List<String> condSplit = Arrays.asList(cond.split(" "));
+        
+        if(condSplit.size() == 3)
+        {
+            String op = condSplit.get(1);
+            
+            try
+            {
+                String leftStr = condSplit.get(0);
+                String rightStr = condSplit.get(2);
+                
+                if(Objects.equals(op, "=") || Objects.equals(op, "=="))
+                {
+                    if(!Utils.isDigit(leftStr) && !Utils.isDigit(rightStr))
+                    {
+                        if(leftStr.equalsIgnoreCase(rightStr))
+                            return true;
+                    }
+                }
+                
+                double left = Double.parseDouble(PlaceholderAPI.setPlaceholders(p, leftStr)
+                        .replaceAll("[a-zA-Z!@#$&*()/\\\\\\[\\]{}:\"?]", ""));
+                
+                double right = Double.parseDouble(PlaceholderAPI.setPlaceholders(p, rightStr)
+                        .replaceAll("[a-zA-Z!@#$&*()/\\\\\\[\\]{}:\"?]", ""));
+                
+                switch(op)
+                {
+                    case ">": return left > right;
+                    case "<": return left < right;
+                    
+                    case "<=": return left <= right;
+                    case ">=": return left >= right;
+                    
+                    case "!=": return left != right;
+                    case "==": return left == right;
+                    
+                    default: return false;
+                }
+            }
+            catch(NumberFormatException ex)
+            {
+                plugin.log("Failed to parse the condition: " + cond);
+            }
+            
+            return false;
+        }
+        else
+        {
+            String result = PlaceholderAPI.setPlaceholders(p, cond).toLowerCase();
+    
+            return result.equals("yes") || result.equals("true");
+        }
+    }
+    
+    public static boolean isDigit(String str)
+    {
+        try
+        {
+            Double.parseDouble(str);
+        }
+        catch(NumberFormatException ex)
+        {
+            return false;
+        }
+        
+        return true;
     }
 }

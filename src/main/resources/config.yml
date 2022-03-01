@@ -56,3 +56,21 @@ startup:
   # Alternatively you can use opt out the subtitle or the times, or just the subtitle.
   #  - '[TITLE] This is a title'
   #  - '[TITLE] This is a title, 20, 60, 20'
+  #
+  # You can also filter out the players using placeholders.
+  # - '[PLAYER (%vault_eco_balance% > 1000)] This will only be executed by the player if he has more than 1000 balance.'
+  # Same applies to all the other actions, title, message, sound, etc., ex:
+  # '[TITLE (%vault_eco_balance% > 1000)] You have more than 1000 balance!'
+  # This will send a title to all the players that have more than 1000 balance.
+  #
+  # Available operators:
+  # - X less than Y: <
+  # - X is greater than Y: >
+  # - X less or equal to Y: <=
+  # - X is greater or equal to Y: >=
+  # - X is equals to Y: ==
+  # - X is not equals to Y: !=
+  #
+  # This works best for placeholders that return numeric values.
+  # Operators might work for values that return yes or true, ex.:
+  # - '[PLAYER (%player_is_op%)] shout Yay, I'm an OP when this job was executed.'
