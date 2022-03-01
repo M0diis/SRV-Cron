@@ -63,12 +63,12 @@ public class Utils
                 }
             }
             
-            if(sendAs.equalsIgnoreCase("[MESSAGE]") || sendAs.equalsIgnoreCase("[TEXT]"))
+            if(sendAs.startsWith("[MESSAGE") || sendAs.startsWith("[TEXT"))
             {
                 sender.sendMessage(cmd);
             }
             
-            if(sendAs.equalsIgnoreCase("[TITLE]"))
+            if(sendAs.startsWith("[TITLE"))
             {
                 String[] split = cmd.split(", ");
                 
@@ -115,12 +115,12 @@ public class Utils
                 }
             }
             
-            if(sendAs.equalsIgnoreCase("[CHAT]"))
+            if(sendAs.startsWith("[CHAT"))
             {
                 sender.chat(cmd);
             }
             
-            if(sendAs.equalsIgnoreCase("[SOUND]"))
+            if(sendAs.startsWith("[SOUND"))
             {
                 String[] split = cmd.split(", ");
                 
@@ -137,7 +137,7 @@ public class Utils
                 }
             }
             
-            if(sendAs.startsWith("[PLAYER]"))
+            if(sendAs.startsWith("[PLAYER"))
                 Bukkit.dispatchCommand(sender, cmd);
             if(sendAs.startsWith("[CONSOLE]"))
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
@@ -182,6 +182,8 @@ public class Utils
             {
                 String leftStr = condSplit.get(0);
                 String rightStr = condSplit.get(2);
+    
+                System.out.println(leftStr + " " + op + " " + rightStr);
                 
                 if(Objects.equals(op, "=") || Objects.equals(op, "=="))
                 {
