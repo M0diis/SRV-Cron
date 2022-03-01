@@ -1,0 +1,11 @@
+name: SRV-Cron
+version: 1.0.0
+author: M0dii
+main: me.m0dii.srvcron.SRVCron
+commands:
+  timer:
+    description: Timer command.
+    usage: /timer <seconds> <command>
+  srvcron:
+    description: Main command.
+    usage: /<command>

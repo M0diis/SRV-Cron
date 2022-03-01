@@ -1,0 +1,40 @@
+jobs:
+  save:
+    time: every 1 hour
+    commands:
+    - say Saving world!
+    - save-all
+    - say Save Complete!
+  restart:
+    time: every 1 day of week at 6:00
+    commands:
+    - say Restart in 10 seconds!
+    - timer 10 stop
+  tps:
+    time: every 30 minutes
+    commands:
+    - tps
+event-jobs:
+  join-event:
+    welcome:
+      time: 1
+      commands:
+      - tell {player} Hello! Welcome here!
+    hello:
+      time: 5
+      commands:
+      - say Say hello to {player}!
+  quit-event:
+    bye:
+      time: 5
+      commands:
+      - say {player} left the game few seconds ago :/
+    remember:
+      time: 20
+      commands:
+       - say {player} is no longer here! Be his memory with us
+startup:
+  commands:
+  - say Server was started!
+  - timer 60 say Server is online for 1 minute!
+  - save-all
