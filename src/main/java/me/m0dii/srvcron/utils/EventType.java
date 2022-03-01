@@ -7,7 +7,8 @@ public enum EventType
     WEATHER_CHANGE_EVENT("weather-change-event"),
     WORLD_LOAD_EVENT("world-load-event"),
     PLAYER_BED_ENTER_EVENT("player-bed-enter-event"),
-    PLAYER_CHANGE_WORLD_EVENT("player-change-world-event");
+    PLAYER_CHANGE_WORLD_EVENT("player-change-world-event"),
+    PLAYER_GAMEMODE_CHANGE_EVENT("player-gamemode-change-event");
 
     private final String configName;
 

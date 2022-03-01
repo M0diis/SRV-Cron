@@ -4,6 +4,7 @@ import me.m0dii.srvcron.SRVCron;
 import me.m0dii.srvcron.utils.EventType;
 import me.m0dii.srvcron.utils.Utils;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -25,8 +26,18 @@ public class EventJob
         this.commands = commands;
         this.eventType = eventType;
     }
-
+    
     public void performJob(Player player)
+    {
+        performJob(player, null);
+    }
+    
+    public void performJob(World world)
+    {
+        performJob(null, world);
+    }
+
+    public void performJob(Player player, World world)
     {
         new BukkitRunnable()
         {
@@ -36,9 +47,24 @@ public class EventJob
                 if(eventType == EventType.JOIN_EVENT && !player.isOnline())
                     return;
 
-                for(String c : commands)
+                for(String cmd : commands)
                 {
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parsePlaceholder(c));
+                    if(world != null)
+                    {
+                        cmd = cmd.replace("%world_name%", world.getName());
+                    }
+    
+                    if(cmd.startsWith("["))
+                    {
+                        for(Player p : Bukkit.getOnlinePlayers())
+                        {
+                            Utils.sendCommand(p, cmd);
+                        }
+                    }
+                    else
+                    {
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parsePlaceholder(cmd));
+                    }
                 }
             }
         }.runTaskLater(SRVCron, time * 20L);

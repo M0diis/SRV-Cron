@@ -19,22 +19,40 @@ event-jobs:
     welcome:
       time: 1
       commands:
-      - tell {player} Hello! Welcome here!
+      - tell %player_name% Hello!
     hello:
       time: 5
       commands:
-      - say Say hello to {player}!
+      - say Say hello to %player_name%!
   quit-event:
     bye:
       time: 5
       commands:
-      - say {player} left the game few seconds ago :/
-    remember:
-      time: 20
-      commands:
-       - say {player} is no longer here! Be his memory with us
+      - say %player_name% left the game few seconds ago.
 startup:
   commands:
   - say Server was started!
   - timer 60 say Server is online for 1 minute!
   - save-all
+  #- [PLAYER] this command will be executed by every online player
+  #- this command will be executed once via the server console
+
+  # Available command actions:
+  # [MESSAGE] or [TEXT] -> this will send a direct message to the player.
+  # [PLAYER] -> a command will be sent by the player.
+  # [CONSOLE] or none -> a command will be sent by the console.
+  # [TITLE] -> will show a title to a player. A more detailed usage below.
+  # [SOUND] -> this will play a sound to the player.
+
+  # Detailed explanation:
+  # This will play a sound to the player.
+  # The first argument is the sound, the second is the volume and the third is the pitch.
+  # You can find a list of sounds here: https://www.digminecraft.com/lists/sound_list_pc.php
+  #  - '[SOUND] ENTITY.PLAYER.LEVELUP, 1.0, 1.0'
+  # This will show a title to the player.
+  # The first argument is the title, the second is the subtitle.
+  # The last three are: fade-in, stay and fade-out times.
+  #  - '[TITLE] This is a title, This is a subtitle, 20, 60, 20'
+  # Alternatively you can use opt out the subtitle or the times, or just the subtitle.
+  #  - '[TITLE] This is a title'
+  #  - '[TITLE] This is a title, 20, 60, 20'

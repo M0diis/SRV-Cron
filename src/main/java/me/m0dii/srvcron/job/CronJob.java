@@ -3,6 +3,7 @@ package me.m0dii.srvcron.job;
 import me.m0dii.srvcron.SRVCron;
 import me.m0dii.srvcron.utils.Utils;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -180,9 +181,19 @@ public class CronJob
     
     public void runCommands()
     {
-        for(String s : new ArrayList<>(cmds))
+        for(String cmd : new ArrayList<>(cmds))
         {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parsePlaceholder(s));
+            if(cmd.startsWith("["))
+            {
+                for(Player p : Bukkit.getOnlinePlayers())
+                {
+                    Utils.sendCommand(p, cmd);
+                }
+            }
+            else
+            {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parsePlaceholder(cmd));
+            }
         }
     }
     

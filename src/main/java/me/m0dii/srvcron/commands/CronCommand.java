@@ -22,17 +22,17 @@ public class CronCommand implements CommandExecutor
     {
         if(args.length == 0)
         {
-            sender.sendMessage("§aMC-Cron system by §M0dii");
-            sender.sendMessage("§aMC-Cron version: §e" + SRVCron.getDescription().getVersion());
+            sender.sendMessage("§aSRV-Cron system by §M0dii");
+            sender.sendMessage("§aSRV-Cron version: §e" + SRVCron.getDescription().getVersion());
             
             return true;
         }
         
         if(args[0].equalsIgnoreCase("reload"))
         {
-            if(!sender.hasPermission("mccron.reload"))
+            if(!sender.hasPermission("srvcron.reload"))
             {
-                sender.sendMessage("§cNo permission!");
+                sender.sendMessage("§cYou have no permission to execute this command.");
                 
                 return true;
             }
@@ -53,9 +53,9 @@ public class CronCommand implements CommandExecutor
         
         if(args[0].equalsIgnoreCase("list"))
         {
-            if(!sender.hasPermission("mccron.list"))
+            if(!sender.hasPermission("srvcron.list"))
             {
-                sender.sendMessage("§cNo permission!");
+                sender.sendMessage("§cYou have no permission to execute this command.");
                 
                 return true;
             }

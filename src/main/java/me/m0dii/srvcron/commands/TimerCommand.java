@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,16 +22,16 @@ public class TimerCommand implements CommandExecutor
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd,
                              @NotNull String label, @NotNull String[] args)
     {
-        if(sender instanceof Player)
+        if(sender.hasPermission("srvcron.timer"))
         {
-            sender.sendMessage("§cOnly console can perform this command!");
+            sender.sendMessage("§cYou do not have permission to execute this command.");
         
             return true;
         }
     
         if(args.length == 0)
         {
-            sender.sendMessage("§aUse /timer <time> <command>");
+            sender.sendMessage("§aUsage: /timer <time> <command>");
             
             return true;
         }
@@ -41,7 +40,8 @@ public class TimerCommand implements CommandExecutor
         {
             StringBuilder c = new StringBuilder();
             
-            for(int i = 1;i < args.length;i++){
+            for(int i = 1; i < args.length; i++)
+            {
                 c.append(" ").append(args[i]);
             }
             

@@ -13,6 +13,7 @@ import org.bstats.charts.MultiLineChart;
 import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -40,46 +41,64 @@ public class SRVCron extends JavaPlugin
     {
         instance = this;
         
-        log("Loading plugin...");
+        log("Loading SRV-Cron...");
+        
         log("Loading config...");
         
         prepareConfig();
         saveConfig();
+    
+        log("Finished loading configuration.");
         
         log("Loading commands...");
         getCommand("timer").setExecutor(new TimerCommand(this));
         getCommand("srvcron").setExecutor(new CronCommand(this));
+    
+        log("Finished loading server commands.");
         
         loadJobs();
 
-        log("Loading managers...");
+        log("Creating Event Managers...");
         new EventManager(this);
+        log("Finished loading Event Managers.");
+    
+    
+        log("Loading metrics...");
+        setupMetrics();
+        log("Finished loading metrics.");
         
-        //log("Loading metrics...");
-        //setupMetrics();
-        
-        log("Everything loaded!");
+        log("SRV-Cron has been loaded successfully.");
         
         new BukkitRunnable()
         {
             @Override
             public void run()
             {
-                log("Dispatching startup commands..");
+                log("Running startup commands...");
                 
                 for(String cmd : getStartUpCommands())
                 {
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parsePlaceholder(cmd));
+                    if(cmd.startsWith("["))
+                    {
+                        for(Player p : Bukkit.getOnlinePlayers())
+                        {
+                            Utils.sendCommand(p, cmd);
+                        }
+                    }
+                    else
+                    {
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parsePlaceholder(cmd));
+                    }
                 }
                 
-                log("Commands dispatched!");
+                log("Startup commands dispatched.");
             }
         }.runTaskLater(this, 20);
     }
     
     private void setupMetrics()
     {
-        Metrics metrics = new Metrics(this, 10924);
+        Metrics metrics = new Metrics(this, 14498);
         
         CustomChart c = new MultiLineChart("players_and_servers", () ->
         {
@@ -102,6 +121,8 @@ public class SRVCron extends JavaPlugin
         ));
     
         metrics.addCustomChart(new SingleLineChart("running_startup_commands", () -> getStartUpCommands().size()));
+    
+        log("Custom charts have been loaded.");
     }
     
     public void loadJobs()
@@ -117,7 +138,7 @@ public class SRVCron extends JavaPlugin
             log("Created new job: " + s);
         }
         
-        log("Total loaded jobs: " + jobs.size());
+        log("Successfully loaded jobs " + (jobs.size() == 1 ? "job" : "jobs") + ".");
         log("Starting cron jobs...");
         
         for(CronJob j : new ArrayList<>(jobs.values()))
@@ -129,11 +150,11 @@ public class SRVCron extends JavaPlugin
             }
             catch(IllegalArgumentException ex)
             {
-                log("Can't start job " + j.getName() + "! " + ex.getMessage());
+                log("Failed to start job " + j.getName() + ": " + ex.getMessage());
             }
         }
         
-        log("All jobs started!");
+        log("Jobs have been started.");
 
         for(String s : getConfig().getConfigurationSection("event-jobs").getKeys(false))
         {
@@ -156,11 +177,11 @@ public class SRVCron extends JavaPlugin
             }
         }
         
-        log("All event jobs registered!");
+        log("Event jobs have been registered.");
 
         List<String> cmds = getConfig().getStringList("startup.commands");
         
-        if(cmds != null)
+        if(cmds != null && !cmds.isEmpty())
         {
             for (String command : cmds)
             {
@@ -169,7 +190,8 @@ public class SRVCron extends JavaPlugin
                 log("Created new startup command: " + command);
             }
         }
-        log("All startup commands registered!");
+        
+        log("Startup commands have been registered.");
     }
     
     @Override
