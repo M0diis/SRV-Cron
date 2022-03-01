@@ -26,7 +26,7 @@ The jar will be found created in `/build/libs/` folder.
 ##### Example
 ```
 git clone https://github.com/M0diis/SRV-Cron.git
-cd M0-SrvCron
+cd SRV-Cron
 gradlew shadowjar
 ```
 

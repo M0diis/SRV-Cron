@@ -1,7 +1,9 @@
 name: SRV-Cron
 version: 1.0.0
 author: M0dii
+api-version: 1.13
 main: me.m0dii.srvcron.SRVCron
+softdepend: [PlaceholderAPI]
 commands:
   timer:
     description: Timer command.

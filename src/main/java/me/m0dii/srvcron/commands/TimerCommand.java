@@ -23,45 +23,42 @@ public class TimerCommand implements CommandExecutor
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd,
                              @NotNull String label, @NotNull String[] args)
     {
-        if(cmd.getName().equalsIgnoreCase("timer"))
+        if(sender instanceof Player)
         {
-            if(sender instanceof Player)
-            {
-                sender.sendMessage("§cOnly console can perform this command!");
-                
-                return true;
-            }
+            sender.sendMessage("§cOnly console can perform this command!");
+        
+            return true;
+        }
+    
+        if(args.length == 0)
+        {
+            sender.sendMessage("§aUse /timer <time> <command>");
             
-            if(args.length == 0)
-            {
-                sender.sendMessage("§aUse /timer <time> <command>");
-                
-                return true;
-            
-            }
-            else if(args.length >= 2)
-            {
-                String c = "";
-                
-                for(int i = 1;i < args.length;i++){
-                    c = c + " " + args[i];
-                }
-                
-                c = c.substring(1);
-                
-                int time = Integer.parseInt(args[0]);
-                
-                if(time > 1800)
-                {
-                    sender.sendMessage("§cMaximum amount is 30 minutes!");
-                    
-                    return true;
-                }
-                
-                runCmd(c, time);
-            }
+            return true;
         }
         
+        if(args.length >= 2)
+        {
+            StringBuilder c = new StringBuilder();
+            
+            for(int i = 1;i < args.length;i++){
+                c.append(" ").append(args[i]);
+            }
+            
+            c = new StringBuilder(c.substring(1));
+            
+            int time = Integer.parseInt(args[0]);
+            
+            if(time > 1800)
+            {
+                sender.sendMessage("§cMaximum amount is 30 minutes!");
+                
+                return true;
+            }
+            
+            runCmd(c.toString(), time);
+        }
+    
         return true;
     }
     

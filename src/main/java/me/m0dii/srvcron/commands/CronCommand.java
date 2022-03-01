@@ -20,58 +20,58 @@ public class CronCommand implements CommandExecutor
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd,
                              @NotNull String label, @NotNull String[] args)
     {
-        if(cmd.getName().equalsIgnoreCase("mccron"))
+        if(args.length == 0)
         {
-            if(args.length == 0)
+            sender.sendMessage("§aMC-Cron system by §M0dii");
+            sender.sendMessage("§aMC-Cron version: §e" + SRVCron.getDescription().getVersion());
+            
+            return true;
+        }
+        
+        if(args[0].equalsIgnoreCase("reload"))
+        {
+            if(!sender.hasPermission("mccron.reload"))
             {
-                sender.sendMessage("§aMC-Cron system by §eThe_TadeSK");
-                sender.sendMessage("§aMC-Cron version: §e" + SRVCron.getDescription().getVersion());
+                sender.sendMessage("§cNo permission!");
                 
                 return true;
             }
-            else if(args[0].equalsIgnoreCase("reload"))
-            {
-                if(!sender.hasPermission("mccron.reload"))
-                {
-                    sender.sendMessage("§cNo permission!");
-                    
-                    return true;
-                }
-                
-                sender.sendMessage("§aReloading jobs..");
-                
-                for(CronJob j : SRVCron.getJobs().values())
-                    j.stopJob();
+            
+            sender.sendMessage("§aReloading jobs..");
+            
+            for(CronJob j : SRVCron.getJobs().values())
+                j.stopJob();
 
-                SRVCron.getJobs().clear();
+            SRVCron.getJobs().clear();
 
-                SRVCron.reloadConfig();
-                SRVCron.saveConfig();
+            SRVCron.reloadConfig();
+            SRVCron.saveConfig();
 
-                SRVCron.loadJobs();
-                sender.sendMessage("§aJobs reloaded!");
-            }
-            else if(args[0].equalsIgnoreCase("list"))
-            {
-                if(!sender.hasPermission("mccron.list"))
-                {
-                    sender.sendMessage("§cNo permission!");
-                    return true;
-                }
-                
-                sender.sendMessage("§aAll Cron jobs:");
-                
-                int id = 1;
-                
-                for(CronJob j : SRVCron.getJobs().values())
-                {
-                    sender.sendMessage("§c" + id + "# §a" + j.getName() + " §e(" + j.getTime() + ") §c" + j.getCommands().size() + " commands");
-                    
-                    id++;
-                }
-            }
+            SRVCron.loadJobs();
+            sender.sendMessage("§aJobs reloaded!");
         }
         
+        if(args[0].equalsIgnoreCase("list"))
+        {
+            if(!sender.hasPermission("mccron.list"))
+            {
+                sender.sendMessage("§cNo permission!");
+                
+                return true;
+            }
+            
+            sender.sendMessage("§aAll Cron jobs:");
+            
+            int id = 1;
+            
+            for(CronJob j : SRVCron.getJobs().values())
+            {
+                sender.sendMessage("§c" + id + "# §a" + j.getName() + " §e(" + j.getTime() + ") §c" + j.getCommands().size() + " commands");
+                
+                id++;
+            }
+        }
+    
         return true;
     }
 
