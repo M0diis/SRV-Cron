@@ -74,3 +74,5 @@ startup:
   # This works best for placeholders that return numeric values.
   # Operators might work for values that return yes or true, ex.:
   # - '[PLAYER (%player_is_op%)] shout Yay, I'm an OP when this job was executed.'
+  # You can also check if player has a permission, ex.:
+  # - '[PLAYER (PERMISSION:some.permission)] shout You have the permission!'

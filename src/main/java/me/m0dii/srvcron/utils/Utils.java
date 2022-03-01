@@ -172,6 +172,13 @@ public class Utils
     
     public static boolean matchesFilter(Player p, String cond)
     {
+        if(cond.toUpperCase().startsWith("PERM") && cond.contains(":"))
+        {
+            String permission = cond.split(":")[1];
+            
+            return p.hasPermission(permission);
+        }
+        
         List<String> condSplit = Arrays.asList(cond.split(" "));
         
         if(condSplit.size() == 3)
@@ -182,8 +189,6 @@ public class Utils
             {
                 String leftStr = condSplit.get(0);
                 String rightStr = condSplit.get(2);
-    
-                System.out.println(leftStr + " " + op + " " + rightStr);
                 
                 if(Objects.equals(op, "=") || Objects.equals(op, "=="))
                 {
