@@ -1,6 +1,7 @@
 package me.m0dii.srvcron.job;
 
 import me.m0dii.srvcron.SRVCron;
+import me.m0dii.srvcron.managers.EventJobDispatchEvent;
 import me.m0dii.srvcron.utils.EventType;
 import me.m0dii.srvcron.utils.Utils;
 import org.bukkit.Bukkit;
@@ -66,6 +67,8 @@ public class EventJob
                         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parsePlaceholder(cmd));
                     }
                 }
+                
+                Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this));
             }
         }.runTaskLater(SRVCron, time * 20L);
     }

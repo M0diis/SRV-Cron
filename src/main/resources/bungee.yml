@@ -1,5 +1,5 @@
 name: SRV-Cron
-version: 2.0.0
+version: 2.1.0
 author: M0dii
 main: me.m0dii.srvcron.bungee.BungeeSRVCron
 commands:

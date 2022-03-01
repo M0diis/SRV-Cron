@@ -1,6 +1,7 @@
 package me.m0dii.srvcron.job;
 
 import me.m0dii.srvcron.SRVCron;
+import me.m0dii.srvcron.managers.CronJobDispatchEvent;
 import me.m0dii.srvcron.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -195,17 +196,22 @@ public class CronJob
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parsePlaceholder(cmd));
             }
         }
+        
+        Bukkit.getPluginManager().callEvent(new CronJobDispatchEvent(this));
     }
     
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
-    public String getTime() {
+    public String getTime()
+    {
         return time;
     }
 
-    public List<String> getCommands() {
+    public List<String> getCommands()
+    {
         return cmds;
     }
 }
