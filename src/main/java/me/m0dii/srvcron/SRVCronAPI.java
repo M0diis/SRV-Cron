@@ -53,6 +53,6 @@ public class SRVCronAPI
     
     public void runEventJob(EventJob job, @Nullable Player player, @Nullable World world)
     {
-        job.performJob(player, world);
+        job.performJob(player, world, null);
     }
 }
