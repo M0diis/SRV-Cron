@@ -107,12 +107,21 @@ public class EventManager implements Listener
     @EventHandler
     public void onStartupCommandDispatchEvent(StartupCommandDispatchEvent event)
     {
-    
+        if(event.isCancelled())
+        {
+            return;
+        }
+        
         new BukkitRunnable()
         {
             @Override
             public void run()
             {
+                if(event.isCancelled())
+                {
+                    return;
+                }
+                
                 for(String cmd : event.getStartupCommands())
                 {
                     if(cmd.startsWith("["))

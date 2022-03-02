@@ -14,7 +14,6 @@ import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.*;
 import java.text.SimpleDateFormat;
@@ -31,6 +30,13 @@ public class SRVCron extends JavaPlugin
     public static SRVCron getInstance()
     {
         return instance;
+    }
+    
+    private final SRVCronAPI api = new SRVCronAPI(this);
+    
+    public SRVCronAPI getAPI()
+    {
+        return api;
     }
     
     private File configFile;
@@ -99,7 +105,7 @@ public class SRVCron extends JavaPlugin
             Arrays.stream(EventType.values()).filter(type -> getEventJobs().containsKey(type)).mapToInt(type -> getEventJobs().get(type).size()).sum()
         ));
     
-        metrics.addCustomChart(new SingleLineChart("running_startup_commands", () -> getStartUpCommands().size()));
+        metrics.addCustomChart(new SingleLineChart("running_startup_commands", () -> getStartupCommands().size()));
     
         log("Custom charts have been loaded.");
     }
@@ -224,7 +230,6 @@ public class SRVCron extends JavaPlugin
         
         if(!this.configFile.exists())
         {
-            //noinspection ResultOfMethodCallIgnored
             this.configFile.getParentFile().mkdirs();
             
             this.copy(this.getResource("config.yml"), this.configFile);
@@ -280,7 +285,7 @@ public class SRVCron extends JavaPlugin
         return eventJobs;
     }
 
-    public List<String> getStartUpCommands()
+    public List<String> getStartupCommands()
     {
         return startUpCommands;
     }

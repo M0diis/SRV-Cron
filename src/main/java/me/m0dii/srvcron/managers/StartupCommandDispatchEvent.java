@@ -1,17 +1,19 @@
 package me.m0dii.srvcron.managers;
 
 import me.m0dii.srvcron.SRVCron;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class StartupCommandDispatchEvent extends Event
+public class StartupCommandDispatchEvent extends Event implements Cancellable
 {
     private static final HandlerList HANDLERS_LIST = new HandlerList();
     
     private final SRVCron srvCron;
+    private boolean isCancelled;
     
     public StartupCommandDispatchEvent(SRVCron srvCron)
     {
@@ -20,7 +22,7 @@ public class StartupCommandDispatchEvent extends Event
 
     public List<String> getStartupCommands()
     {
-        return srvCron.getStartUpCommands();
+        return srvCron.getStartupCommands();
     }
     
     @Override
@@ -32,5 +34,17 @@ public class StartupCommandDispatchEvent extends Event
     public static HandlerList getHandlerList()
     {
         return HANDLERS_LIST;
+    }
+    
+    @Override
+    public boolean isCancelled()
+    {
+        return isCancelled;
+    }
+    
+    @Override
+    public void setCancelled(boolean cancel)
+    {
+        this.isCancelled = cancel;
     }
 }
