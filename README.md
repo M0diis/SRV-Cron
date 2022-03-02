@@ -39,6 +39,7 @@ https://github.com/M0diis/SRV-Cron/actions
 
 #### Links
 
+- [Spigot Page](https://www.spigotmc.org/resources/100382/)
 - [Issues](https://github.com/M0diis/SRV-Cron/issues)
   - [Bug report](https://github.com/M0diis/SRV-Cron/issues/new?assignees=&labels=bug&template=bug_report.md&title=)
   - [Feature request](https://github.com/M0diis/SRV-Cron/issues/new?assignees=&labels=enhancement&template=feature.md)
