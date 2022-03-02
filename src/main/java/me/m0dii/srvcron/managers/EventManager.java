@@ -34,7 +34,7 @@ public class EventManager implements Listener
             return;
 
         for(EventJob job : srvCron.getEventJobs().get(EventType.JOIN_EVENT))
-            job.performJob(player, player.getWorld());
+            job.performJob(player, player.getWorld(), event);
     }
 
     @EventHandler
@@ -46,7 +46,7 @@ public class EventManager implements Listener
             return;
 
         for (EventJob job : srvCron.getEventJobs().get(EventType.QUIT_EVENT))
-            job.performJob(player, player.getWorld());
+            job.performJob(player, player.getWorld(), event);
     }
 
     @EventHandler
@@ -56,7 +56,7 @@ public class EventManager implements Listener
             return;
 
         for (EventJob job : srvCron.getEventJobs().get(EventType.WEATHER_CHANGE_EVENT))
-            job.performJob(event.getWorld());
+            job.performJob(null, event.getWorld(), event);
     }
     
     @EventHandler
@@ -66,7 +66,7 @@ public class EventManager implements Listener
             return;
 
         for (EventJob job : srvCron.getEventJobs().get(EventType.WORLD_LOAD_EVENT))
-            job.performJob(event.getWorld());
+            job.performJob(null, event.getWorld(), event);
     }
     
     @EventHandler
@@ -78,7 +78,7 @@ public class EventManager implements Listener
             return;
 
         for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_GAMEMODE_CHANGE_EVENT))
-            job.performJob(player, player.getWorld());
+            job.performJob(player, player.getWorld(), event);
     }
     
     @EventHandler
@@ -90,7 +90,7 @@ public class EventManager implements Listener
             return;
 
         for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_BED_ENTER_EVENT))
-            job.performJob(player, player.getWorld());
+            job.performJob(player, player.getWorld(), event);
     }
     
     @EventHandler
@@ -102,7 +102,19 @@ public class EventManager implements Listener
             return;
 
         for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_CHANGE_WORLD_EVENT))
-            job.performJob(player, player.getWorld());
+            job.performJob(player, player.getWorld(), event);
+    }
+    
+    @EventHandler
+    public void onPlayerKickEvent(PlayerKickEvent event)
+    {
+        Player player = event.getPlayer();
+        
+        if (ignore(EventType.PLAYER_KICK_EVENT))
+            return;
+
+        for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_KICK_EVENT))
+            job.performJob(player, player.getWorld(), event);
     }
     
     @EventHandler

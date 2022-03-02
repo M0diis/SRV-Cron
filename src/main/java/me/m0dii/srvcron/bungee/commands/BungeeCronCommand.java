@@ -42,6 +42,7 @@ public class BungeeCronCommand extends Command
             cron.saveConfig();
 
             cron.loadJobs();
+            
             sender.sendMessage("§aJobs reloaded!");
         }
         else if(args[0].equalsIgnoreCase("list"))

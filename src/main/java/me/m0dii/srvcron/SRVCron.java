@@ -83,7 +83,7 @@ public class SRVCron extends JavaPlugin
     
     private void setupMetrics()
     {
-        Metrics metrics = new Metrics(this, 14498);
+        Metrics metrics = new Metrics(this, 14503);
         
         CustomChart c = new MultiLineChart("players_and_servers", () ->
         {

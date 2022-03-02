@@ -8,7 +8,8 @@ public enum EventType
     WORLD_LOAD_EVENT("world-load-event"),
     PLAYER_BED_ENTER_EVENT("player-bed-enter-event"),
     PLAYER_CHANGE_WORLD_EVENT("player-change-world-event"),
-    PLAYER_GAMEMODE_CHANGE_EVENT("player-gamemode-change-event");
+    PLAYER_GAMEMODE_CHANGE_EVENT("player-gamemode-change-event"),
+    PLAYER_KICK_EVENT("player-kick-event");
 
     private final String configName;
 

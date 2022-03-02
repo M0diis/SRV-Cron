@@ -19,25 +19,28 @@ public class BungeeTimerCommand extends Command
     }
 
     @Override
-    public void execute(CommandSender sender, String[] args) {
-        if(sender instanceof ProxiedPlayer){
+    public void execute(CommandSender sender, String[] args)
+    {
+        if(sender instanceof ProxiedPlayer)
+        {
             sender.sendMessage("§cOnly console can perform this command!");
             return;
         }
+        
         if(args.length == 0)
         {
             sender.sendMessage("§aUse /timer <time> <command>");
         }
         else if(args.length >= 2)
         {
-            String c = "";
+            StringBuilder c = new StringBuilder();
             
             for(int i = 1; i < args.length;i++)
             {
-                c = c + " " + args[i];
+                c.append(" ").append(args[i]);
             }
             
-            c = c.substring(1);
+            c = new StringBuilder(c.substring(1));
 
             int time = Integer.parseInt(args[0]);
             
@@ -48,7 +51,7 @@ public class BungeeTimerCommand extends Command
                 return;
             }
             
-            runCmd(c, time);
+            runCmd(c.toString(), time);
         }
     }
     

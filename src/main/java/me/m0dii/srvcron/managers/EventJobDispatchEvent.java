@@ -17,14 +17,16 @@ public class EventJobDispatchEvent extends Event implements Cancellable
     private static final HandlerList HANDLERS_LIST = new HandlerList();
     
     private final EventJob eventJob;
+    private final Event event;
     private final Player player;
     private final World world;
     
     private boolean isCancelled;
     
-    public EventJobDispatchEvent(EventJob eventJob, Player player, World world)
+    public EventJobDispatchEvent(EventJob eventJob, Event event, Player player, World world)
     {
         this.eventJob = eventJob;
+        this.event = event;
         
         this.player = player;
         this.world = world;
@@ -76,6 +78,11 @@ public class EventJobDispatchEvent extends Event implements Cancellable
     public World getWorld()
     {
         return world;
+    }
+    
+    public Event getEvent()
+    {
+        return event;
     }
     
     @Override

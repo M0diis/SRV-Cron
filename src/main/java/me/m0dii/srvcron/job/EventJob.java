@@ -6,6 +6,7 @@ import me.m0dii.srvcron.utils.EventType;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
@@ -29,15 +30,15 @@ public class EventJob
     
     public void performJob(Player player)
     {
-        performJob(player, null);
+        performJob(player, null, null);
     }
     
     public void performJob(World world)
     {
-        performJob(null, world);
+        performJob(null, world, null);
     }
 
-    public void performJob(Player player, World world)
+    public void performJob(Player player, World world, Event event)
     {
         new BukkitRunnable()
         {
@@ -47,7 +48,7 @@ public class EventJob
                 if(eventType == EventType.JOIN_EVENT && !player.isOnline())
                     return;
                 
-                Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, player, world));
+                Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, event, player, world));
             }
         }.runTaskLater(SRVCron, time * 20L);
     }
