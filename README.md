@@ -49,7 +49,7 @@ compileOnly 'com.github.m0diis:srv-cron:{VERSION}'
 #### Import with Maven
 ```xml
 <dependency>
- <groupId>me.m0diis</groupId>
+ <groupId>com.github.m0diis</groupId>
   <artifactId>srv-cron</artifactId>
   <version>{VERSION}</version>
  <scope>provided</scope>
