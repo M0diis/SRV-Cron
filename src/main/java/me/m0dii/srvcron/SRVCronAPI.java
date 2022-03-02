@@ -38,9 +38,17 @@ public class SRVCronAPI
         job.runCommands();
     }
     
-    public List<EventJob> getEventJobs(EventType type)
+    public List<EventJob> getEventJobsByType(EventType type)
     {
         return plugin.getEventJobs().getOrDefault(type, null);
+    }
+    
+    public EventJob getEventJobByName(String jobName)
+    {
+        return plugin.getEventJobs().values().stream()
+                .flatMap(List::stream)
+                .filter(job -> job.getName().equals(jobName))
+                .findFirst().orElse(null);
     }
     
     public void runEventJob(EventJob job, @Nullable Player player, @Nullable World world)

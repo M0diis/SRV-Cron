@@ -3,7 +3,6 @@ package me.m0dii.srvcron.job;
 import me.m0dii.srvcron.SRVCron;
 import me.m0dii.srvcron.managers.EventJobDispatchEvent;
 import me.m0dii.srvcron.utils.EventType;
-import me.m0dii.srvcron.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -47,26 +46,6 @@ public class EventJob
             {
                 if(eventType == EventType.JOIN_EVENT && !player.isOnline())
                     return;
-
-                for(String cmd : commands)
-                {
-                    if(world != null)
-                    {
-                        cmd = cmd.replace("%world_name%", world.getName());
-                    }
-    
-                    if(cmd.startsWith("["))
-                    {
-                        for(Player p : Bukkit.getOnlinePlayers())
-                        {
-                            Utils.sendCommand(p, cmd);
-                        }
-                    }
-                    else
-                    {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd));
-                    }
-                }
                 
                 Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, player, world));
             }

@@ -5,6 +5,7 @@ import me.m0dii.srvcron.job.EventJob;
 import me.m0dii.srvcron.utils.EventType;
 import me.m0dii.srvcron.utils.Utils;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -138,6 +139,61 @@ public class EventManager implements Listener
                 }
             }
         }.runTaskLater(srvCron, 20);
+    }
+    
+    @EventHandler
+    public void onCronJobDispatchEvent(CronJobDispatchEvent event)
+    {
+        if(event.isCancelled())
+        {
+            return;
+        }
+    
+        for(String cmd : event.getJobCommands())
+        {
+            if(cmd.startsWith("["))
+            {
+                for(Player p : Bukkit.getOnlinePlayers())
+                {
+                    Utils.sendCommand(p, cmd);
+                }
+            }
+            else
+            {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd));
+            }
+        }
+    }
+    
+    @EventHandler
+    public void onEventJobDispatchEvent(EventJobDispatchEvent event)
+    {
+        if(event.isCancelled())
+        {
+            return;
+        }
+    
+        for(String cmd : event.getJobCommands())
+        {
+            World world = event.getWorld();
+            
+            if(world != null)
+            {
+                cmd = cmd.replace("%world_name%", world.getName());
+            }
+        
+            if(cmd.startsWith("["))
+            {
+                for(Player p : Bukkit.getOnlinePlayers())
+                {
+                    Utils.sendCommand(p, cmd);
+                }
+            }
+            else
+            {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd));
+            }
+        }
     }
     
     private boolean ignore(EventType type)
