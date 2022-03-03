@@ -15,14 +15,14 @@ public class Utils
     
     public static String setPlaceholders(String str, Player p)
     {
-        if (plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null)
-        {
-            str = PlaceholderAPI.setPlaceholders(p, str);
-        }
-    
         if(p != null)
         {
             str = str.replace("%player_name%", p.getName());
+        }
+        
+        if (plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null)
+        {
+            str = PlaceholderAPI.setPlaceholders(p, str);
         }
         
         return str;

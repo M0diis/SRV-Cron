@@ -1,6 +1,7 @@
 package me.m0dii.srvcron.managers;
 
 import me.m0dii.srvcron.SRVCron;
+import me.m0dii.srvcron.job.CronJob;
 import me.m0dii.srvcron.job.EventJob;
 import me.m0dii.srvcron.utils.EventType;
 import me.m0dii.srvcron.utils.Utils;
@@ -160,6 +161,17 @@ public class EventManager implements Listener
         {
             return;
         }
+        
+        CronJob job = event.getCronJob();
+    
+        if(job.isSuspended())
+        {
+            srvCron.log("Job " + job.getName() + " is suspended, skipping...");
+        
+            return;
+        }
+    
+        job.increaseRunCount();
     
         for(String cmd : event.getJobCommands())
         {

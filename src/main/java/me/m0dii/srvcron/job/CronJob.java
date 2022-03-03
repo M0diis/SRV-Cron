@@ -24,6 +24,9 @@ public class CronJob
     private String clockTime = "";
     private BukkitTask task;
     
+    private boolean suspended = false;
+    private int runCount = 0;
+    
     public CronJob(SRVCron SRVCron, List<String> cmds, String time, String name)
     {
         this.SRVCron = SRVCron;
@@ -196,5 +199,30 @@ public class CronJob
     public List<String> getCommands()
     {
         return cmds;
+    }
+    
+    public int getRunCount()
+    {
+        return runCount;
+    }
+
+    public void increaseRunCount()
+    {
+        runCount++;
+    }
+    
+    public void suspend()
+    {
+        suspended = true;
+    }
+    
+    public void resume()
+    {
+        suspended = false;
+    }
+    
+    public boolean isSuspended()
+    {
+        return suspended;
     }
 }

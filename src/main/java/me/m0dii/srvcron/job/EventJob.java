@@ -18,6 +18,9 @@ public class EventJob
     private final int time;
     private final List<String> commands;
     private final EventType eventType;
+    
+    private boolean suspended = false;
+    private int runCount;
 
     public EventJob(SRVCron SRVCron, String name, int time, List<String> commands, EventType eventType)
     {
@@ -48,6 +51,13 @@ public class EventJob
                 if(eventType == EventType.JOIN_EVENT && !player.isOnline())
                     return;
                 
+                if(EventJob.this.suspended)
+                {
+                    EventJob.this.SRVCron.log("Job " + EventJob.this.name + " is suspended, skipping...");
+                    
+                    return;
+                }
+                
                 Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, event, player, world));
             }
         }.runTaskLater(SRVCron, time * 20L);
@@ -66,5 +76,30 @@ public class EventJob
     public List<String> getCommands()
     {
         return commands;
+    }
+    
+    public int getRunCount()
+    {
+        return runCount;
+    }
+    
+    public void increaseRunCount()
+    {
+        runCount++;
+    }
+    
+    public void suspend()
+    {
+        suspended = true;
+    }
+    
+    public void resume()
+    {
+        suspended = false;
+    }
+    
+    public boolean isSuspended()
+    {
+        return suspended;
     }
 }

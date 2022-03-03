@@ -2,6 +2,7 @@ package me.m0dii.srvcron.bungee.commands;
 
 import me.m0dii.srvcron.bungee.BungeeSRVCron;
 import me.m0dii.srvcron.bungee.job.BungeeCronJob;
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.plugin.Command;
 
@@ -23,7 +24,8 @@ public class BungeeCronCommand extends Command
             sender.sendMessage("§aSRV-Cron system by §eM0dii");
             sender.sendMessage("§aSRV-Cron version: §e" + cron.getDescription().getVersion());
         }
-        else if(args[0].equalsIgnoreCase("reload"))
+        
+        if(args[0].equalsIgnoreCase("reload"))
         {
             if(!sender.hasPermission("mccron.reload"))
             {
@@ -47,19 +49,32 @@ public class BungeeCronCommand extends Command
         }
         else if(args[0].equalsIgnoreCase("list"))
         {
-            if(!sender.hasPermission("mccron.list")){
+            if(!sender.hasPermission("mccron.list"))
+            {
                 sender.sendMessage("§cNo permission!");
                 return;
             }
             
-            sender.sendMessage("§aAll Cron jobs:");
+            sendf(sender, "&7----------------------------------");
+            sendf(sender, "&aAll jobs (" + cron.getJobs().size() + ")");
+            
             int id = 1;
             
             for(BungeeCronJob j : cron.getJobs().values())
             {
-                sender.sendMessage("§c" + id + "# §a" + j.getName() + " §e(" + j.getTime() + ") §c" + j.getCommands().size() + " commands");
+                sendf(sender, String.format("&8#&7%d& &a%s &8(&7%s&8) &2%d commands;", id, j.getName().toLowerCase(), j.getTime(),
+                        j.getCommands().size()));
                 id++;
             }
+    
+            sendf(sender, "&7----------------------------------");
         }
+    }
+    
+    private void sendf(CommandSender sender, String msg)
+    {
+        String m = ChatColor.translateAlternateColorCodes('&', msg);
+        
+        sender.sendMessage(m);
     }
 }

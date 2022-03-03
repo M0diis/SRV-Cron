@@ -237,7 +237,6 @@ public class SRVCron extends JavaPlugin
         
         try
         {
-            this.getConfig().options().copyDefaults(true);
             this.getConfig().save(this.configFile);
         }
         catch(IOException ex)
@@ -246,6 +245,8 @@ public class SRVCron extends JavaPlugin
         }
         
         YamlConfiguration.loadConfiguration(this.configFile);
+    
+        this.copy(getResource("config.yml_backup"), new File(this.getDataFolder(), "config.yml_backup"));
     }
     
     private void copy(InputStream in, File file)
