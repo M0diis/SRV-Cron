@@ -20,11 +20,11 @@ import java.util.List;
 
 public class CronCommand implements CommandExecutor, TabCompleter
 {
-    private final SRVCron SRVCron;
+    private final SRVCron srvCron;
 
-    public CronCommand(SRVCron SRVCron)
+    public CronCommand(SRVCron srvCron)
     {
-        this.SRVCron = SRVCron;
+        this.srvCron = srvCron;
     }
 
     @Override
@@ -34,7 +34,7 @@ public class CronCommand implements CommandExecutor, TabCompleter
         if(args.length == 0)
         {
             sendf(sender, "&aSRV-Cron by &2M0dii");
-            sendf(sender, "&aVersion: &2" + SRVCron.getDescription().getVersion());
+            sendf(sender, "&aVersion: &2" + srvCron.getDescription().getVersion());
         
             return true;
         }
@@ -59,17 +59,17 @@ public class CronCommand implements CommandExecutor, TabCompleter
         
             sendf(sender, "&aReloading jobs..");
         
-            for(CronJob j : SRVCron.getJobs().values())
+            for(CronJob j : srvCron.getJobs().values())
             {
                 j.stopJob();
             }
         
-            SRVCron.getJobs().clear();
+            srvCron.getJobs().clear();
         
-            SRVCron.reloadConfig();
-            SRVCron.saveConfig();
+            srvCron.reloadConfig();
+            srvCron.saveConfig();
         
-            SRVCron.loadJobs();
+            srvCron.loadJobs();
         
             sendf(sender, "&aJobs have been reloaded.");
         }
@@ -90,6 +90,10 @@ public class CronCommand implements CommandExecutor, TabCompleter
         {
             list(sender, args);
         }
+        else if(args[0].equalsIgnoreCase("run"))
+        {
+            run(sender, args);
+        }
     }
     
     private void suspend(CommandSender sender, String[] args)
@@ -108,14 +112,14 @@ public class CronCommand implements CommandExecutor, TabCompleter
             return;
         }
         
-        if(!SRVCron.getJobs().containsKey(args[1]))
+        if(!srvCron.getJobs().containsKey(args[1]))
         {
             sendf(sender, "&cJob &4\"" + args[1] + "\" &cdoes not exist.");
     
             return;
         }
         
-        CronJob j = SRVCron.getJobs().get(args[1]);
+        CronJob j = srvCron.getJobs().get(args[1]);
         
         if(j.isSuspended())
         {
@@ -156,7 +160,7 @@ public class CronCommand implements CommandExecutor, TabCompleter
             
             EventJob job = null;
             
-            for(List<EventJob> l : SRVCron.getEventJobs().values())
+            for(List<EventJob> l : srvCron.getEventJobs().values())
             {
                 for(EventJob ej : l)
                 {
@@ -190,20 +194,26 @@ public class CronCommand implements CommandExecutor, TabCompleter
                     Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd));
                 }
             }
-            
-            sendf(sender, "&aEvent Job &2\"" + args[2] + "\" &a commands have been executed.");
+    
+            srvCron.log("Manually running Event Job " + job.getName() + " by " + sender.getName());
+    
+            sendf(sender, "&aEvent Job &2\"" + args[2] + "\" &acommands have been executed.");
             
             return;
         }
         
-        if(!SRVCron.getJobs().containsKey(args[1]))
+        if(!srvCron.getJobs().containsKey(args[1]))
         {
             sendf(sender, "&cJob &4\"" + args[1] + "\" &cdoes not exist.");
     
             return;
         }
         
-        CronJob j = SRVCron.getJobs().get(args[1]);
+        CronJob j = srvCron.getJobs().get(args[1]);
+        
+        srvCron.log("Manually running job " + j.getName() + " by " + sender.getName());
+    
+        sendf(sender, "&aJob &2\"" + args[2] + "\" &ahas been dispatched.");
     
         Bukkit.getPluginManager().callEvent(new CronJobDispatchEvent(j));
     }
@@ -222,12 +232,12 @@ public class CronCommand implements CommandExecutor, TabCompleter
             if(args[1].equalsIgnoreCase("events"))
             {
                 sendf(sender, "&8&m----------------------------------");
-                sendf(sender, "&7EVENT JOBS &8(&7" + SRVCron.getEventJobs().size() + "&8)");
+                sendf(sender, "&7EVENT JOBS &8(&7" + srvCron.getEventJobs().size() + "&8)");
                 sendf(sender, "&8&m----------------------------------");
             
                 int id = 1;
             
-                for(List<EventJob> eventJobs : SRVCron.getEventJobs().values())
+                for(List<EventJob> eventJobs : srvCron.getEventJobs().values())
                 {
                     for(EventJob job : eventJobs)
                     {
@@ -243,12 +253,12 @@ public class CronCommand implements CommandExecutor, TabCompleter
         }
         
         sendf(sender, "&8&m----------------------------------");
-        sendf(sender, "&7CRON JOBS &8(&7" + SRVCron.getJobs().size() + "&8)");
+        sendf(sender, "&7CRON JOBS &8(&7" + srvCron.getJobs().size() + "&8)");
         sendf(sender, "&8&m----------------------------------");
         
         int id = 1;
         
-        for(CronJob j : SRVCron.getJobs().values())
+        for(CronJob j : srvCron.getJobs().values())
         {
             if(j.isSuspended())
             {
@@ -284,12 +294,12 @@ public class CronCommand implements CommandExecutor, TabCompleter
             return;
         }
         
-        if(!SRVCron.getJobs().containsKey(args[1]))
+        if(!srvCron.getJobs().containsKey(args[1]))
         {
             sendf(sender, "&cJob &4\"" + args[1] + "\" &cdoes not exist.");
         }
         
-        CronJob j = SRVCron.getJobs().get(args[1]);
+        CronJob j = srvCron.getJobs().get(args[1]);
         
         sendf(sender, "&8&m----------------------------------");
         sendf(sender, "&7JOB INFORMATION");
@@ -325,14 +335,14 @@ public class CronCommand implements CommandExecutor, TabCompleter
             return;
         }
         
-        if(!SRVCron.getJobs().containsKey(args[1]))
+        if(!srvCron.getJobs().containsKey(args[1]))
         {
             sendf(sender, "&cJob &4\"" + args[1] + "\" &cdoes not exist.");
     
             return;
         }
         
-        CronJob j = SRVCron.getJobs().get(args[1]);
+        CronJob j = srvCron.getJobs().get(args[1]);
         
         if(!j.isSuspended())
         {
@@ -352,6 +362,7 @@ public class CronCommand implements CommandExecutor, TabCompleter
         
         sender.sendMessage(m);
     }
+    
     @Override
     public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias,
                                                 @NotNull String[] args)
@@ -364,12 +375,14 @@ public class CronCommand implements CommandExecutor, TabCompleter
             completes.add("list");
             completes.add("jobinfo");
             completes.add("run");
+            completes.add("resume");
+            completes.add("suspend");
         }
         
         if(args.length == 2 && args[0].equalsIgnoreCase("run"))
         {
             completes.add("event");
-            completes.addAll(SRVCron.getJobs().keySet());
+            completes.addAll(srvCron.getJobs().keySet());
         }
         
         if(args.length == 2 && args[0].equalsIgnoreCase("list"))
@@ -380,12 +393,12 @@ public class CronCommand implements CommandExecutor, TabCompleter
         
         if(args.length == 2 && args[0].equalsIgnoreCase("jobinfo"))
         {
-            completes.addAll(SRVCron.getJobs().keySet());
+            completes.addAll(srvCron.getJobs().keySet());
         }
         
         if(args.length == 2 && args[0].equalsIgnoreCase("suspend"))
         {
-            for(CronJob j : SRVCron.getJobs().values())
+            for(CronJob j : srvCron.getJobs().values())
             {
                 if(!j.isSuspended())
                 {
@@ -396,7 +409,7 @@ public class CronCommand implements CommandExecutor, TabCompleter
         
         if(args.length == 2 && args[0].equalsIgnoreCase("resume"))
         {
-            for(CronJob j : SRVCron.getJobs().values())
+            for(CronJob j : srvCron.getJobs().values())
             {
                 if(j.isSuspended())
                 {
@@ -408,7 +421,7 @@ public class CronCommand implements CommandExecutor, TabCompleter
         if(args.length == 3 && args[0].equalsIgnoreCase("run")
         && args[1].equalsIgnoreCase("event"))
         {
-            for(List<EventJob> list : SRVCron.getEventJobs().values())
+            for(List<EventJob> list : srvCron.getEventJobs().values())
             {
                 for(EventJob job : list)
                 {

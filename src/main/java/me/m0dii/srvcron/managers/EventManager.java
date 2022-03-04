@@ -196,6 +196,15 @@ public class EventManager implements Listener
         {
             return;
         }
+        
+        EventJob job = event.getEventJob();
+        
+        if(job.isSuspended())
+        {
+            srvCron.log("Event Job " + job.getName() + " is suspended, skipping...");
+        
+            return;
+        }
     
         for(String cmd : event.getJobCommands())
         {
