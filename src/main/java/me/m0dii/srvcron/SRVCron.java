@@ -7,6 +7,7 @@ import me.m0dii.srvcron.job.EventJob;
 import me.m0dii.srvcron.managers.EventManager;
 import me.m0dii.srvcron.managers.StartupCommandDispatchEvent;
 import me.m0dii.srvcron.utils.EventType;
+import me.m0dii.srvcron.utils.UpdateChecker;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.CustomChart;
 import org.bstats.charts.MultiLineChart;
@@ -79,6 +80,25 @@ public class SRVCron extends JavaPlugin
         Bukkit.getPluginManager().callEvent(new StartupCommandDispatchEvent(this));
     
         log("Startup commands dispatched.");
+        
+        log("Checking for updates...");
+        
+        checkForUpdates();
+        
+        log("Finished checking for updates.");
+    }
+    
+    private void checkForUpdates()
+    {
+        new UpdateChecker(this, 100382).getVersion(ver ->
+        {
+            if (!this.getDescription().getVersion().equalsIgnoreCase(ver))
+            {
+                log("You are running an outdated version of SRV-Cron.");
+                log("You can download the latest version on Spigot:");
+                log("https://www.spigotmc.org/resources/100382/");
+            }
+        });
     }
     
     private void setupMetrics()
