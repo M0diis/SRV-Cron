@@ -22,7 +22,7 @@ public class TimerCommand implements CommandExecutor
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd,
                              @NotNull String label, @NotNull String[] args)
     {
-        if(!sender.hasPermission("srvcron.timer"))
+        if(!sender.hasPermission("srvcron.command.timer"))
         {
             sender.sendMessage("§cYou do not have permission to execute this command.");
         
