@@ -12,33 +12,63 @@
 ![build][buildImage] ![release][releaseImage] ![license][licenseImage]
 
 ## SRV-Cron
-Scheduler, jobs, events for your server.
+Scheduler, jobs, events for your server. Schedule anything that your server needs.
 
 ### Development
-Building is quite simple.
+Building is really simple.
 
 To build SRV-Cron, you need JDK 8 or higher and Gradle installed on your system.
 
-Clone the repository or download the source code from releases.  
-Run `gradlew shadowjar` to build the jar.  
-The jar will be found created in `/build/libs/` folder. 
-
-##### Example
 ```
 git clone https://github.com/M0diis/SRV-Cron.git
 cd SRV-Cron
 gradlew shadowjar
 ```
 
+The jar will be generated in `/build/libs/` folder. 
+
 ### Dev-builds
 
-All the development builds can be found on actions page.
-Open the workflow and get the artifact from there.
+All the development builds can be found on actions page. These builds will have the latest features but may include some bugs and other unwanted issues. Use at your own risk.
 
+Open the latest workflow and get the artifact from there:  
 https://github.com/M0diis/SRV-Cron/actions
+
+### API
+
+SRV-Cron comes with an API that allows developers to interact with the plugin. If you think there is something missing in the API - feel free to create a feature or pull request.
+
+Before you can actually make use of SRV-Cron API, you first have to import it into your project.
+You can get the access to the API simply by depending on the plugin itself.  
+Replace `{VERSION}` with the latest build release.
+
+#### Import with Gradle
+```groovy
+compileOnly 'com.github.m0diis:srv-cron:{VERSION}'
+```
+#### Import with Maven
+```xml
+<dependency>
+ <groupId>com.github.m0diis</groupId>
+  <artifactId>srv-cron</artifactId>
+  <version>{VERSION}</version>
+ <scope>provided</scope>
+</dependency>
+```
+Get the API:
+```java
+public static void myMethod()
+{
+    SRVCronAPI api = SRVCron.getInstance().getAPI();
+}
+```
+
+Read more about the API usage on the wiki page:  
+https://github.com/M0diis/SRV-Cron/wiki/API
 
 #### Links
 
+- [Spigot Page](https://www.spigotmc.org/resources/100382/)
 - [Issues](https://github.com/M0diis/SRV-Cron/issues)
   - [Bug report](https://github.com/M0diis/SRV-Cron/issues/new?assignees=&labels=bug&template=bug_report.md&title=)
   - [Feature request](https://github.com/M0diis/SRV-Cron/issues/new?assignees=&labels=enhancement&template=feature.md)
