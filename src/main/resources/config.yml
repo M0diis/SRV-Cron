@@ -21,16 +21,17 @@ event-jobs:
     welcome:
       time: 1
       commands:
-      - tell %player_name% Hello!
+      - tell {player_name} Hello!
+      - <ALL>[CHAT] Hello {player_name}!
     hello:
       time: 5
       commands:
-      - say Say hello to %player_name%!
+      - say Say hello to {player_name{!
   quit-event:
     bye:
       time: 5
       commands:
-      - say %player_name% left the game few seconds ago.
+      - say {player_name{ left the game few seconds ago.
   player-gamemode-change-event:
     cancel:
       time: 0
@@ -41,8 +42,9 @@ startup:
   - say Server was started!
   - timer 60 say Server is online for 1 minute!
   - save-all
-  #- [PLAYER] this command will be executed by every online player
-  #- this command will be executed once via the server console
+  #- <ALL>[PLAYER] will be executed by every online player.
+  #- <ALL>[CONSOLE] will be executed by console for every online player. Placeholders will apply to the player.
+  #- will be executed once via the server console.
 
   # Available command actions:
   # [MESSAGE] or [TEXT] -> this will send a direct message to the player.

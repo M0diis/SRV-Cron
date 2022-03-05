@@ -138,10 +138,18 @@ public class EventManager implements Listener
                 
                 for(String cmd : event.getStartupCommands())
                 {
-                    for(Player p : Bukkit.getOnlinePlayers())
+                    if(cmd.toUpperCase().startsWith("<ALL>"))
                     {
-                        Utils.sendCommand(p, cmd);
+                        for(Player p : Bukkit.getOnlinePlayers())
+                        {
+                            Utils.sendCommand(p, cmd);
+                        }
                     }
+                    else
+                    {
+                        Utils.sendCommand(null, cmd);
+                    }
+
                 }
             }
         }.runTaskLater(srvCron, 20);
@@ -215,8 +223,10 @@ public class EventManager implements Listener
                 cmd = Utils.handleDispatcherPlaceholders(cmd, player);
             }
     
-            if(cmd.startsWith("["))
+            if(cmd.toUpperCase().startsWith("<ALL>"))
             {
+                cmd = cmd.replace("<ALL>", "");
+                
                 for(Player p : Bukkit.getOnlinePlayers())
                 {
                     Utils.sendCommand(p, cmd);

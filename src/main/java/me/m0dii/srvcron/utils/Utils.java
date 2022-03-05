@@ -77,7 +77,7 @@ public class Utils
     {
         cmd = setPlaceholders(cmd, onlinePlayer);
         
-        if(cmd.startsWith("["))
+        if(cmd.startsWith("[") && onlinePlayer != null)
         {
             String sendAs = cmd.substring(cmd.indexOf("["), cmd.indexOf("]") + 1).toUpperCase();
             
@@ -171,6 +171,7 @@ public class Utils
             
             if(sendAs.startsWith("[PLAYER"))
                 Bukkit.dispatchCommand(onlinePlayer, cmd);
+            
             if(sendAs.startsWith("[CONSOLE]"))
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
         }

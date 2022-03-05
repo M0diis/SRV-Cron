@@ -182,10 +182,22 @@ public class CronCommand implements CommandExecutor, TabCompleter
     
             for(String cmd : job.getCommands())
             {
-                for(Player p : Bukkit.getOnlinePlayers())
+                if(cmd.toUpperCase().startsWith("<ALL>"))
                 {
-                    Utils.sendCommand(p, cmd);
+                    cmd = cmd.replace("<ALL>", "");
+                    
+                    for(Player p : Bukkit.getOnlinePlayers())
+                    {
+                        Utils.sendCommand(p, cmd);
+                    }
                 }
+                else
+                {
+                    if(sender instanceof Player)
+                        Utils.sendCommand((Player)sender, cmd);
+                    else Utils.sendCommand(null, cmd);
+                }
+
             }
     
             srvCron.log("Manually running Event Job " + job.getName() + " by " + sender.getName());
