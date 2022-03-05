@@ -26,12 +26,12 @@ event-jobs:
     hello:
       time: 5
       commands:
-      - say Say hello to {player_name{!
+      - say Say hello to {player_name}!
   quit-event:
     bye:
       time: 5
       commands:
-      - say {player_name{ left the game few seconds ago.
+      - say {player_name} left the game few seconds ago.
   player-gamemode-change-event:
     cancel:
       time: 0
