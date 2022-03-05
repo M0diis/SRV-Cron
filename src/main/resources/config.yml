@@ -31,6 +31,11 @@ event-jobs:
       time: 5
       commands:
       - say %player_name% left the game few seconds ago.
+  player-gamemode-change-event:
+    cancel:
+      time: 0
+      commands:
+      - 'broadcast Player {player_name} changed his gamemode..'
 startup:
   commands:
   - say Server was started!

@@ -6,15 +6,45 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Objects;
 
 public class Utils
 {
     private static final SRVCron plugin = SRVCron.getInstance();
     
+    public static String handleDispatcherPlaceholders(String str, @NotNull Player p)
+    {
+        StringBuilder result = new StringBuilder();
+        
+        String[] split = str.split(" ");
+    
+        for(String s : split)
+        {
+            if(s.startsWith("{") && s.endsWith("}"))
+            {
+                String placeholder = s.replaceAll("[{}]", "%");
+                result.append(PlaceholderAPI.setPlaceholders(p, placeholder));
+            }
+            else
+            {
+                result.append(s);
+            }
+            
+            result.append(" ");
+        }
+        
+        return result.toString().replace("{player_name}", p.getName()).trim();
+    }
+    
     public static String setPlaceholders(String str, Player p)
     {
+        str = str.trim();
+        
         if(p != null)
         {
             str = str.replace("%player_name%", p.getName());
@@ -43,21 +73,21 @@ public class Utils
         return ChatColor.translateAlternateColorCodes('&', text);
     }
     
-    public static void sendCommand(Player sender, String cmd)
+    public static void sendCommand(Player onlinePlayer, String cmd)
     {
-        cmd = setPlaceholders(cmd, sender);
+        cmd = setPlaceholders(cmd, onlinePlayer);
         
         if(cmd.startsWith("["))
         {
             String sendAs = cmd.substring(cmd.indexOf("["), cmd.indexOf("]") + 1).toUpperCase();
             
-            cmd = cmd.substring(cmd.indexOf("]") + 2);
+            cmd = cmd.substring(cmd.indexOf("]") + 1);
             
             if(sendAs.contains("(") && sendAs.contains(")"))
             {
                 String cond = sendAs.substring(sendAs.indexOf("(") + 1, sendAs.indexOf(")"));
                 
-                if(!matchesFilter(sender, cond))
+                if(!matchesFilter(onlinePlayer, cond))
                 {
                     return;
                 }
@@ -65,7 +95,9 @@ public class Utils
             
             if(sendAs.startsWith("[MESSAGE") || sendAs.startsWith("[TEXT"))
             {
-                sender.sendMessage(cmd);
+                onlinePlayer.sendMessage(cmd);
+                
+                return;
             }
             
             if(sendAs.startsWith("[TITLE"))
@@ -79,10 +111,10 @@ public class Utils
                 switch(split.length)
                 {
                     case 1:
-                        sender.sendTitle(split[0], "", fadeIn, stay, fadeOut);
+                        onlinePlayer.sendTitle(split[0], "", fadeIn, stay, fadeOut);
                     break;
                     case 2:
-                        sender.sendTitle(split[0], split[1], fadeIn, stay, fadeOut);
+                        onlinePlayer.sendTitle(split[0], split[1], fadeIn, stay, fadeOut);
                     break;
                     case 4:
                         try
@@ -96,7 +128,7 @@ public class Utils
                             plugin.log("Invalid fadeIn, stay, or fadeOut time for title action.");
                         }
                         
-                        sender.sendTitle(split[0], "", fadeIn, stay, fadeOut);
+                        onlinePlayer.sendTitle(split[0], "", fadeIn, stay, fadeOut);
                     break;
                     case 5:
                         String subtitle = split[1];
@@ -110,14 +142,14 @@ public class Utils
                         {
                             plugin.log("Invalid fadeIn, stay, or fadeOut time for title action.");
                         }
-                        sender.sendTitle(split[0], subtitle, fadeIn, stay, fadeOut);
+                        onlinePlayer.sendTitle(split[0], subtitle, fadeIn, stay, fadeOut);
                     break;
                 }
             }
             
             if(sendAs.startsWith("[CHAT"))
             {
-                sender.chat(cmd);
+                onlinePlayer.chat(cmd);
             }
             
             if(sendAs.startsWith("[SOUND"))
@@ -128,7 +160,7 @@ public class Utils
                 {
                     try
                     {
-                        sender.playSound(sender.getLocation(), Sound.valueOf(split[0]), Float.parseFloat(split[1]), Float.parseFloat(split[1]));
+                        onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.valueOf(split[0]), Float.parseFloat(split[1]), Float.parseFloat(split[1]));
                     }
                     catch (Exception ex)
                     {
@@ -138,11 +170,11 @@ public class Utils
             }
             
             if(sendAs.startsWith("[PLAYER"))
-                Bukkit.dispatchCommand(sender, cmd);
+                Bukkit.dispatchCommand(onlinePlayer, cmd);
             if(sendAs.startsWith("[CONSOLE]"))
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
         }
-        else Bukkit.dispatchCommand(sender, cmd);
+        else Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
     }
     
     public static boolean isTime(String clockTime)

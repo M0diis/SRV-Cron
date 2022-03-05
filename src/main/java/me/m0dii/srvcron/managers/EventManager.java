@@ -138,16 +138,9 @@ public class EventManager implements Listener
                 
                 for(String cmd : event.getStartupCommands())
                 {
-                    if(cmd.startsWith("["))
+                    for(Player p : Bukkit.getOnlinePlayers())
                     {
-                        for(Player p : Bukkit.getOnlinePlayers())
-                        {
-                            Utils.sendCommand(p, cmd);
-                        }
-                    }
-                    else
-                    {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd));
+                        Utils.sendCommand(p, cmd);
                     }
                 }
             }
@@ -184,7 +177,7 @@ public class EventManager implements Listener
             }
             else
             {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd));
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd, null));
             }
         }
     }
@@ -214,7 +207,14 @@ public class EventManager implements Listener
             {
                 cmd = cmd.replace("%world_name%", world.getName());
             }
-        
+            
+            Player player = event.getPlayer();
+            
+            if(player != null)
+            {
+                cmd = Utils.handleDispatcherPlaceholders(cmd, player);
+            }
+    
             if(cmd.startsWith("["))
             {
                 for(Player p : Bukkit.getOnlinePlayers())
@@ -224,7 +224,7 @@ public class EventManager implements Listener
             }
             else
             {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd));
+                Utils.sendCommand(player, cmd);
             }
         }
     }

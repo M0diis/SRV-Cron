@@ -182,16 +182,9 @@ public class CronCommand implements CommandExecutor, TabCompleter
     
             for(String cmd : job.getCommands())
             {
-                if(cmd.startsWith("["))
+                for(Player p : Bukkit.getOnlinePlayers())
                 {
-                    for(Player p : Bukkit.getOnlinePlayers())
-                    {
-                        Utils.sendCommand(p, cmd);
-                    }
-                }
-                else
-                {
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd));
+                    Utils.sendCommand(p, cmd);
                 }
             }
     

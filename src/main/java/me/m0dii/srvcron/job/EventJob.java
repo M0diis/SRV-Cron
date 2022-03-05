@@ -43,24 +43,31 @@ public class EventJob
 
     public void performJob(Player player, World world, Event event)
     {
-        new BukkitRunnable()
+        if(eventType == EventType.JOIN_EVENT && !player.isOnline())
+            return;
+    
+        if(EventJob.this.suspended)
         {
-            @Override
-            public void run()
+            EventJob.this.SRVCron.log("Job " + EventJob.this.name + " is suspended, skipping...");
+        
+            return;
+        }
+
+        if(time == 0)
+        {
+            Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, event, player, world));
+        }
+        else
+        {
+            new BukkitRunnable()
             {
-                if(eventType == EventType.JOIN_EVENT && !player.isOnline())
-                    return;
-                
-                if(EventJob.this.suspended)
+                @Override
+                public void run()
                 {
-                    EventJob.this.SRVCron.log("Job " + EventJob.this.name + " is suspended, skipping...");
-                    
-                    return;
+                    Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, event, player, world));
                 }
-                
-                Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, event, player, world));
-            }
-        }.runTaskLater(SRVCron, time * 20L);
+            }.runTaskLater(SRVCron, time * 20L);
+        }
     }
 
     public String getName()
