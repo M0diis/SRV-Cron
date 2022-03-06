@@ -14,6 +14,20 @@
 ## SRV-Cron
 Scheduler, jobs, events for your server. Schedule anything that your server needs.
 
+### Commands & Permissions
+
+| Command             | Permission               | Usage & Description           
+|---------------------|--------------------------|--------------------
+| /srvcron reload     | srvcron.command.reload   | Reload jobs & configuration.        
+| /srvcron run        | srvcron.command.run      | `/srvcron run <job-name> [event <event-name]` - run a job manually.
+| /srvcron suspend    | srvcron.command.suspend  | `/srvcron suspend <job-name>` - suspend job execution. The commands will not be executed on job dispatch.
+| /srvcron resume     | srvcron.command.resume   | `/srvcron resume <job-name>` - resume a job. Allow the job to execute commands on the next dispatch.
+| /srvcron jobinfo    | srvcron.command.jobinfo  | `/srvcron jobinfo <job-name>` - information about a Cron-Job.
+| /srvcron list       | srvcron.command.list     | `/srvcron list [events]` - this will list all Cron or, if provided required argument, Event jobs.
+| /timer              | srvcron.command.timer    | `/timer <seconds> <command>` - this will execute a command after specified delay. (Max time is 30 min.)
+
+`<>` neccessary; `[]` optional.
+
 ### Development
 Building is really simple.
 
