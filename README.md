@@ -87,3 +87,17 @@ https://github.com/M0diis/SRV-Cron/wiki/API
   - [Bug report](https://github.com/M0diis/SRV-Cron/issues/new?assignees=&labels=bug&template=bug_report.md&title=)
   - [Feature request](https://github.com/M0diis/SRV-Cron/issues/new?assignees=&labels=enhancement&template=feature.md)
 - [Pull requests](https://github.com/M0diis/SRV-Cron/pulls)
+
+## FAQ
+
+#### I have a feature suggestion | I found a bug
+Please open a Github [issue](https://github.com/M0diis/SRV-Cron/issues) or reach out to me via SpigotMC or, prefferably, [discord](https://discord.gg/ZSzJTSWxmv).
+
+#### Where can I download the plugin from?
+You can get it from:
+- [Spigot Page](https://www.spigotmc.org/resources/100382/)
+- [Releases](https://github.com/M0diis/SRV-Cron/releases) here on Github.
+- Compile it yourself.
+
+#### Can I modify your plugin?
+Yes, you can, as long as you comply with the license. 
