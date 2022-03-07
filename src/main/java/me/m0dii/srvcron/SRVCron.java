@@ -11,6 +11,7 @@ import me.m0dii.srvcron.utils.UpdateChecker;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -113,20 +114,30 @@ public class SRVCron extends JavaPlugin
     public void loadJobs()
     {
         log("Loading cron jobs....");
-        
-        for(String s : getConfig().getConfigurationSection("jobs").getKeys(false))
+    
+        ConfigurationSection jobsSection = getConfig().getConfigurationSection("jobs");
+    
+        if(jobsSection != null)
         {
-            List<String> cmds = getConfig().getStringList("jobs." + s + ".commands");
-            String time = getConfig().getString("jobs." + s + ".time");
-            
-            jobs.put(s, new CronJob(this, cmds, time, s));
-            log("Created new job: " + s);
-        }
+            for(String s : jobsSection.getKeys(false))
+            {
+                List<String> cmds = getConfig().getStringList("jobs." + s + ".commands");
+                String time = getConfig().getString("jobs." + s + ".time");
         
-        log("Successfully loaded jobs " + (jobs.size() == 1 ? "job" : "jobs") + ".");
+                this.jobs.put(s, new CronJob(this, cmds, time, s));
+                log("Created new job: " + s);
+            }
+    
+            log("Successfully loaded jobs " + (this.jobs.size() == 1 ? "job" : "jobs") + ".");
+        }
+        else
+        {
+            log("Configuration section with jobs was not found.");
+        }
+    
         log("Starting cron jobs...");
         
-        for(CronJob j : new ArrayList<>(jobs.values()))
+        for(CronJob j : new ArrayList<>(this.jobs.values()))
         {
             try
             {
@@ -140,33 +151,55 @@ public class SRVCron extends JavaPlugin
         }
         
         log("Jobs have been started.");
-
-        for(String s : getConfig().getConfigurationSection("event-jobs").getKeys(false))
+    
+        ConfigurationSection eventJobSection = getConfig().getConfigurationSection("event-jobs");
+        
+        if(eventJobSection != null)
         {
-            EventType type = EventType.isEventJob(s);
-            
-            if(type != null)
+            for(String s : eventJobSection.getKeys(false))
             {
-                List<EventJob> jobs = new ArrayList<>();
-                
-                for(String name : getConfig().getConfigurationSection("event-jobs." + s).getKeys(false))
+                EventType type = EventType.isEventJob(s);
+        
+                if(type != null)
                 {
-                    int time = getConfig().getInt("event-jobs." + s + "." + name + ".time");
-                    List<String> cmds = getConfig().getStringList("event-jobs." + s + "." + name + ".commands");
-                    jobs.add(new EventJob(this, name, time, cmds, type));
+                    List<EventJob> jobs = new ArrayList<>();
+    
+                    ConfigurationSection eventJobsSection = getConfig().getConfigurationSection("event-jobs." + s);
                     
-                    log("Created new event job: " + name + " (" + type.getConfigName() + ")");
+                    if(eventJobsSection != null)
+                    {
+                        for(String name : eventJobsSection.getKeys(false))
+                        {
+                            int time = getConfig().getInt("event-jobs." + s + "." + name + ".time");
+                            List<String> cmds = getConfig().getStringList("event-jobs." + s + "." + name + ".commands");
+                            jobs.add(new EventJob(this, name, time, cmds, type));
+        
+                            log("Created new event job: " + name + " (" + type.getConfigName() + ")");
+                        }
+    
+                        eventJobs.put(type, jobs);
+                    }
+                    else
+                    {
+                        log("Configuration section for jobs in event job '" + s + "' was not found.");
+                    }
                 }
-
-                eventJobs.put(type, jobs);
             }
+    
+            log("Event jobs have been registered.");
+        }
+        else
+        {
+            log("Configuration section with event jobs was not found.");
         }
         
-        log("Event jobs have been registered.");
-
         List<String> cmds = getConfig().getStringList("startup.commands");
-        
-        if(cmds != null && !cmds.isEmpty())
+    
+        if(cmds == null || cmds.isEmpty())
+        {
+            log("Configuration section with startup commands was not found.");
+        }
+        else
         {
             for (String command : cmds)
             {
@@ -174,9 +207,9 @@ public class SRVCron extends JavaPlugin
                 
                 log("Created new startup command: " + command);
             }
+    
+            log("Startup commands have been registered.");
         }
-        
-        log("Startup commands have been registered.");
     }
     
     @Override
@@ -186,10 +219,10 @@ public class SRVCron extends JavaPlugin
         //saveConfig();
     }
     
-    public void log(String info)
+    public void log(String msg)
     {
-        getLogger().info(info);
-        logToFile(info);
+        getLogger().info(msg);
+        logToFile(msg);
     }
     
     private void logToFile(String info)
