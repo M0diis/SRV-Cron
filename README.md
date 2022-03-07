@@ -1,18 +1,36 @@
 <!-- Variables -->
 
-[resourceId]: 00000
+[resourceId]: 100382
 
 [buildImage]: https://github.com/M0diis/M0-CoreCord/actions/workflows/gradle.yml/badge.svg
 [releaseImage]: https://img.shields.io/github/v/release/M0diis/SRV-Cron.svg?label=github%20release
 [updatedImage]: https://badges.pufler.dev/updated/M0diis/SRV-Cron
 [licenseImage]: https://img.shields.io/github/license/M0diis/SRV-Cron.svg
+[ratingImage]: https://img.shields.io/badge/dynamic/json.svg?color=brightgreen&label=rating&query=%24.rating.average&suffix=%20%2F%205&url=https%3A%2F%2Fapi.spiget.org%2Fv2%2Fresources%2F100382
+[downloadsImage]: https://img.shields.io/badge/dynamic/json.svg?color=brightgreen&label=downloads%20%28spigotmc.org%29&query=%24.downloads&url=https%3A%2F%2Fapi.spiget.org%2Fv2%2Fresources%2F100382
+[spigotVersionImage]: https://img.shields.io/badge/dynamic/json.svg?color=brightgreen&label=latest%20version%20%28spigotmc.org%29&query=%24.name&url=https%3A%2F%2Fapi.spiget.org%2Fv2%2Fresources%2F100382%2Fversions%2Flatest
 
 <!-- End of variables block -->
 
-![build][buildImage] ![release][releaseImage] ![license][licenseImage]
+![build][buildImage] ![release][releaseImage] ![license][licenseImage] ![updated][updatedImage]  
+ ![rating][ratingImage] ![downloads][downloadsImage] ![spigotVersion][spigotVersionImage]
 
 ## SRV-Cron
 Scheduler, jobs, events for your server. Schedule anything that your server needs.
+
+### Commands & Permissions
+
+| Command             | Permission               | Usage & Description           
+|---------------------|--------------------------|--------------------
+| /srvcron reload     | srvcron.command.reload   | Reload jobs & configuration.        
+| /srvcron run        | srvcron.command.run      | `/srvcron run <job-name> [event <event-name]` - run a job manually.
+| /srvcron suspend    | srvcron.command.suspend  | `/srvcron suspend <job-name>` - suspend job execution. The commands will not be executed on job dispatch.
+| /srvcron resume     | srvcron.command.resume   | `/srvcron resume <job-name>` - resume a job. Allow the job to execute commands on the next dispatch.
+| /srvcron jobinfo    | srvcron.command.jobinfo  | `/srvcron jobinfo <job-name>` - information about a Cron-Job.
+| /srvcron list       | srvcron.command.list     | `/srvcron list [events]` - this will list all Cron or, if provided required argument, Event jobs.
+| /timer              | srvcron.command.timer    | `/timer <seconds> <command>` - this will execute a command after specified delay. (Max time is 30 min.)
+
+`<>` neccessary; `[]` optional.
 
 ### Development
 Building is really simple.
@@ -73,3 +91,17 @@ https://github.com/M0diis/SRV-Cron/wiki/API
   - [Bug report](https://github.com/M0diis/SRV-Cron/issues/new?assignees=&labels=bug&template=bug_report.md&title=)
   - [Feature request](https://github.com/M0diis/SRV-Cron/issues/new?assignees=&labels=enhancement&template=feature.md)
 - [Pull requests](https://github.com/M0diis/SRV-Cron/pulls)
+
+## FAQ
+
+#### I have a feature suggestion | I found a bug
+Please open a Github [issue](https://github.com/M0diis/SRV-Cron/issues) or reach out to me via SpigotMC or, prefferably, [discord](https://discord.gg/ZSzJTSWxmv).
+
+#### Where can I download the plugin from?
+You can get it from:
+- [Spigot Page](https://www.spigotmc.org/resources/100382/)
+- [Releases](https://github.com/M0diis/SRV-Cron/releases) here on Github.
+- Compile it yourself.
+
+#### Can I modify your plugin?
+Yes, you can, as long as you comply with the license. 
