@@ -9,8 +9,6 @@ import me.m0dii.srvcron.managers.StartupCommandDispatchEvent;
 import me.m0dii.srvcron.utils.EventType;
 import me.m0dii.srvcron.utils.UpdateChecker;
 import org.bstats.bukkit.Metrics;
-import org.bstats.charts.CustomChart;
-import org.bstats.charts.MultiLineChart;
 import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -49,25 +47,23 @@ public class SRVCron extends JavaPlugin
         
         log("Loading SRV-Cron...");
         
-        log("Loading config...");
-        
+        log("Loading configuration...");
         prepareConfig();
         saveConfig();
-    
         log("Finished loading configuration.");
         
         log("Loading commands...");
         getCommand("timer").setExecutor(new TimerCommand(this));
         getCommand("srvcron").setExecutor(new CronCommand(this));
-    
-        log("Finished loading server commands.");
+        log("Finished loading commands.");
         
+        log("Loading jobs...");
         loadJobs();
+        log("Finished loading jobs.");
 
         log("Creating Event Managers...");
         new EventManager(this);
         log("Finished loading Event Managers.");
-    
     
         log("Loading metrics...");
         setupMetrics();
@@ -76,15 +72,11 @@ public class SRVCron extends JavaPlugin
         log("SRV-Cron has been loaded successfully.");
     
         log("Running startup commands...");
-    
         Bukkit.getPluginManager().callEvent(new StartupCommandDispatchEvent(this));
-    
         log("Startup commands dispatched.");
         
         log("Checking for updates...");
-        
         checkForUpdates();
-        
         log("Finished checking for updates.");
     }
     
@@ -105,27 +97,15 @@ public class SRVCron extends JavaPlugin
     {
         Metrics metrics = new Metrics(this, 14503);
         
-        CustomChart c = new MultiLineChart("players_and_servers", () ->
-        {
-            Map<String, Integer> valueMap = new HashMap<>();
-            
-            valueMap.put("servers", 1);
-            valueMap.put("players", Bukkit.getOnlinePlayers().size());
-            
-            return valueMap;
-        });
-        
-        metrics.addCustomChart(c);
-    
         log("Loading custom charts for metrics...");
     
-        metrics.addCustomChart(new SingleLineChart("running_jobs", () -> getJobs().size()));
+        metrics.addCustomChart(new SingleLineChart("running_jobs", jobs::size));
 
         metrics.addCustomChart(new SingleLineChart("running_event_jobs", () ->
-            Arrays.stream(EventType.values()).filter(type -> getEventJobs().containsKey(type)).mapToInt(type -> getEventJobs().get(type).size()).sum()
+            Arrays.stream(EventType.values()).filter(eventJobs::containsKey).mapToInt(type -> eventJobs.get(type).size()).sum()
         ));
     
-        metrics.addCustomChart(new SingleLineChart("running_startup_commands", () -> getStartupCommands().size()));
+        metrics.addCustomChart(new SingleLineChart("running_startup_commands", startUpCommands::size));
     
         log("Custom charts have been loaded.");
     }

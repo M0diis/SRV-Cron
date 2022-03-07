@@ -176,7 +176,7 @@ public class EventManager implements Listener
     
         for(String cmd : event.getJobCommands())
         {
-            if(cmd.startsWith("["))
+            if(cmd.toUpperCase().startsWith("<ALL>"))
             {
                 for(Player p : Bukkit.getOnlinePlayers())
                 {
@@ -185,7 +185,7 @@ public class EventManager implements Listener
             }
             else
             {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd, null));
+                Utils.sendCommand(null, cmd);
             }
         }
     }
