@@ -4,6 +4,7 @@
 # [CONSOLE] or none -> a command will be sent by the console.
 # [TITLE] -> will show a title to a player. A more detailed usage below.
 # [SOUND] -> this will play a sound to the player.
+# [LOG <logname>] -> this will log a message to a log file.
 #
 #- <ALL>[PLAYER] will be executed by every online player EXCEPT the player who dispatched the event.
 #- <ALL>[CONSOLE] will be executed by console for every online player. Placeholders will apply to the player.
@@ -80,12 +81,15 @@ event-jobs:
       commands:
       - say {player_name} left the game few seconds ago.
   player-gamemode-change-event:
-    cancel:
+    whisper:
       time: 0
       commands:
-      - 'broadcast Player {player_name} changed his gamemode..'
+      - "<ALL> [TEXT (PERM:staff.notify.gamemode)] Player{player_name} changed his gamemode from {from_gamemode} to {to_gamemode}"
 startup:
   commands:
   - say Server was started!
   - timer 60 say Server is online for 1 minute!
   - save-all
+  - '[LOG <server_startup.log>] Server has been started.'
+
+debug: false

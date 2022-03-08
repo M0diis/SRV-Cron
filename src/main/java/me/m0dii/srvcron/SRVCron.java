@@ -8,6 +8,7 @@ import me.m0dii.srvcron.managers.EventManager;
 import me.m0dii.srvcron.managers.StartupCommandDispatchEvent;
 import me.m0dii.srvcron.utils.EventType;
 import me.m0dii.srvcron.utils.UpdateChecker;
+import me.m0dii.srvcron.utils.Utils;
 import org.bstats.bukkit.Metrics;
 import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
@@ -16,7 +17,6 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class SRVCron extends JavaPlugin
@@ -215,46 +215,23 @@ public class SRVCron extends JavaPlugin
     @Override
     public void onDisable()
     {
-        //reloadConfig();
-        //saveConfig();
+//        Map<String, List<String>> messagesByFile = Utils.messagesByFile;
+//
+//        for(String file : messagesByFile.keySet())
+//        {
+//            List<String> messages = messagesByFile.get(file);
+//
+//            for(String m : messages)
+//            {
+//                Utils.logToFile(file, m);
+//            }
+//        }
     }
     
     public void log(String msg)
     {
         getLogger().info(msg);
-        logToFile(msg);
-    }
-    
-    private void logToFile(String info)
-    {
-        try
-        {
-            File dataFolder = getDataFolder();
-            
-            if(!dataFolder.exists())
-            {
-                dataFolder.mkdir();
-            }
-            
-            File saveTo = new File(getDataFolder(), "log.txt");
-            
-            if (!saveTo.exists())
-            {
-                saveTo.createNewFile();
-            }
-            
-            FileWriter fw = new FileWriter(saveTo, true);
-            PrintWriter pw = new PrintWriter(fw);
-            
-            pw.println("[" + new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(new Date()) + "] "+ info);
-            pw.flush();
-            pw.close();
-            
-        }
-        catch(IOException ex)
-        {
-            ex.printStackTrace();
-        }
+        Utils.logToFile("log.txt", msg);
     }
     
     private void prepareConfig()
