@@ -229,6 +229,18 @@ public class EventManager implements Listener
                 
                 for(Player p : Bukkit.getOnlinePlayers())
                 {
+                    if(player != null && p.getUniqueId().equals(player.getUniqueId()))
+                        continue;
+                    
+                    Utils.sendCommand(p, cmd);
+                }
+            }
+            else if(cmd.toUpperCase().startsWith("<ALL+>"))
+            {
+                cmd = cmd.replace("<ALL+>", "");
+    
+                for(Player p : Bukkit.getOnlinePlayers())
+                {
                     Utils.sendCommand(p, cmd);
                 }
             }
