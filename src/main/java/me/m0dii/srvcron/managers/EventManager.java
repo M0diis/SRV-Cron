@@ -7,6 +7,7 @@ import me.m0dii.srvcron.utils.EventType;
 import me.m0dii.srvcron.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -14,6 +15,9 @@ import org.bukkit.event.player.*;
 import org.bukkit.event.weather.WeatherChangeEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EventManager implements Listener
 {
@@ -37,17 +41,107 @@ public class EventManager implements Listener
         for(EventJob job : srvCron.getEventJobs().get(EventType.JOIN_EVENT))
             job.performJob(player, player.getWorld(), event);
     }
+    
+    @EventHandler
+    public void onPlayerItemPickupEvent(PlayerPickupItemEvent event)
+    {
+        if(ignore(EventType.ITEM_PICKUP_EVENT))
+            return;
+    
+        Player player = event.getPlayer();
+        Item item = event.getItem();
+
+        for(EventJob job : srvCron.getEventJobs().get(EventType.ITEM_PICKUP_EVENT))
+        {
+            List<String> commands = new ArrayList<>(job.getCommands());
+    
+            for(int i = 0; i < commands.size(); i++)
+            {
+                String command = commands.get(i);
+                
+                command = command.replaceAll("\\{item_type}", item.getItemStack().getType().name());
+                command = command.replaceAll("\\{item_amount}", String.valueOf(item.getItemStack().getAmount()));
+        
+                commands.set(i, command);
+            }
+    
+            job.performJob(player, player.getWorld(), event, commands);
+        }
+    }
+    
+    @EventHandler
+    public void onCommandEvent(PlayerCommandPreprocessEvent event)
+    {
+        Player player = event.getPlayer();
+
+        if (ignore(EventType.COMMAND_EVENT))
+            return;
+
+        for (EventJob job : srvCron.getEventJobs().get(EventType.COMMAND_EVENT))
+        {
+            List<String> commands = new ArrayList<>(job.getCommands());
+    
+            for(int i = 0; i < commands.size(); i++)
+            {
+                String command = commands.get(i);
+        
+                command = command.replaceAll("\\{command}", event.getMessage());
+        
+                commands.set(i, command);
+            }
+    
+            job.performJob(player, player.getWorld(), event, commands);
+        }
+    }
+    
+    @EventHandler
+    public void onPlayerChatEvent(AsyncPlayerChatEvent event)
+    {
+        if(ignore(EventType.CHAT_EVENT))
+            return;
+
+        Player player = event.getPlayer();
+        
+        for(EventJob job : srvCron.getEventJobs().get(EventType.CHAT_EVENT))
+        {
+            List<String> commands = new ArrayList<>(job.getCommands());
+    
+            for(int i = 0; i < commands.size(); i++)
+            {
+                String command = commands.get(i);
+        
+                command = command.replaceAll("\\{message}", event.getMessage());
+
+                commands.set(i, command);
+            }
+    
+            job.performJob(player, player.getWorld(), event, commands);
+        }
+    }
 
     @EventHandler
     public void onQuitEvent(PlayerQuitEvent event)
     {
-        Player player = event.getPlayer();
-
         if (ignore(EventType.QUIT_EVENT))
             return;
-
+    
+        Player player = event.getPlayer();
+        
         for (EventJob job : srvCron.getEventJobs().get(EventType.QUIT_EVENT))
-            job.performJob(player, player.getWorld(), event);
+        {
+            List<String> commands = new ArrayList<>(job.getCommands());
+    
+            for(int i = 0; i < commands.size(); i++)
+            {
+                String command = commands.get(i);
+        
+                command = command.replaceAll("\\{quit_reason}", event.getReason().name());
+        
+                commands.set(i, command);
+            }
+    
+            job.performJob(player, player.getWorld(), event, commands);
+        }
     }
 
     @EventHandler
@@ -73,49 +167,128 @@ public class EventManager implements Listener
     @EventHandler
     public void onPlayerGamemodeChangeEvent(PlayerGameModeChangeEvent event)
     {
-        Player player = event.getPlayer();
-
         if (ignore(EventType.PLAYER_GAMEMODE_CHANGE_EVENT))
             return;
-
+    
+        Player player = event.getPlayer();
+        
         for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_GAMEMODE_CHANGE_EVENT))
-            job.performJob(player, player.getWorld(), event);
+        {
+            List<String> commands = new ArrayList<>(job.getCommands());
+    
+            for(int i = 0; i < commands.size(); i++)
+            {
+                String command = commands.get(i);
+        
+                command = command.replaceAll("\\{from_gamemode}", player.getGameMode().name());
+                command = command.replaceAll("\\{to_gamemode}", event.getNewGameMode().name());
+        
+                commands.set(i, command);
+            }
+    
+            job.performJob(player, player.getWorld(), event, commands);
+        }
     }
     
     @EventHandler
     public void onPlayerBedEnterEvent(PlayerBedEnterEvent event)
     {
-        Player player = event.getPlayer();
-        
         if (ignore(EventType.PLAYER_BED_ENTER_EVENT))
             return;
+    
+        Player player = event.getPlayer();
 
         for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_BED_ENTER_EVENT))
             job.performJob(player, player.getWorld(), event);
     }
     
     @EventHandler
-    public void onPlayerChangedWorldEvent(PlayerChangedWorldEvent event)
+    public void onPlayerAdvancementDoneEvent(PlayerAdvancementDoneEvent event)
     {
+        if (ignore(EventType.PLAYER_ADVANCEMENT_DONE_EVENT))
+            return;
+    
+        Player player = event.getPlayer();
+
+        for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_ADVANCEMENT_DONE_EVENT))
+        {
+            List<String> commands = new ArrayList<>(job.getCommands());
+    
+            for(int i = 0; i < commands.size(); i++)
+            {
+                String command = commands.get(i);
+        
+                command = command.replaceAll("\\{advancement_name}",
+                        event.getAdvancement().getKey().getKey().replace("/", " "));
+        
+                commands.set(i, command);
+            }
+    
+            job.performJob(player, player.getWorld(), event, commands);
+        }
+    }
+    
+    @EventHandler
+    public void onPlayerBedLeaveEvent(PlayerBedLeaveEvent event)
+    {
+        if (ignore(EventType.PLAYER_BED_LEAVE_EVENT))
+            return;
+        
         Player player = event.getPlayer();
         
+        for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_BED_LEAVE_EVENT))
+            job.performJob(player, player.getWorld(), event);
+    }
+    
+    @EventHandler
+    public void onPlayerChangedWorldEvent(PlayerChangedWorldEvent event)
+    {
         if (ignore(EventType.PLAYER_CHANGE_WORLD_EVENT))
             return;
+        
+        Player player = event.getPlayer();
 
         for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_CHANGE_WORLD_EVENT))
-            job.performJob(player, player.getWorld(), event);
+        {
+            List<String> commands = new ArrayList<>(job.getCommands());
+    
+            for(int i = 0; i < commands.size(); i++)
+            {
+                String command = commands.get(i);
+        
+                command = command.replaceAll("\\{to_world_name}", player.getWorld().getName());
+                command = command.replaceAll("\\{from_world_name}", event.getFrom().getName());
+        
+                commands.set(i, command);
+            }
+    
+            job.performJob(player, player.getWorld(), event, commands);
+        }
     }
     
     @EventHandler
     public void onPlayerKickEvent(PlayerKickEvent event)
     {
-        Player player = event.getPlayer();
-        
         if (ignore(EventType.PLAYER_KICK_EVENT))
             return;
+        
+        Player player = event.getPlayer();
 
         for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_KICK_EVENT))
-            job.performJob(player, player.getWorld(), event);
+        {
+            List<String> commands = new ArrayList<>(job.getCommands());
+    
+            for(int i = 0; i < commands.size(); i++)
+            {
+                String command = commands.get(i);
+        
+                command = command.replaceAll("\\{kick_reason}", event.getReason());
+                
+                commands.set(i, command);
+            }
+    
+            job.performJob(player, player.getWorld(), event, commands);
+        }
     }
     
     @EventHandler
@@ -207,13 +380,13 @@ public class EventManager implements Listener
             return;
         }
     
-        for(String cmd : event.getJobCommands())
+        for(String cmd : event.getFinalCommands())
         {
             World world = event.getWorld();
             
             if(world != null)
             {
-                cmd = cmd.replace("%world_name%", world.getName());
+                cmd = cmd.replace("{world_name}", world.getName());
             }
             
             Player player = event.getPlayer();

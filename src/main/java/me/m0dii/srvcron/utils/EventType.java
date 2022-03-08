@@ -7,9 +7,14 @@ public enum EventType
     WEATHER_CHANGE_EVENT("weather-change-event"),
     WORLD_LOAD_EVENT("world-load-event"),
     PLAYER_BED_ENTER_EVENT("player-bed-enter-event"),
+    PLAYER_BED_LEAVE_EVENT("player-bed-leave-event"),
     PLAYER_CHANGE_WORLD_EVENT("player-change-world-event"),
     PLAYER_GAMEMODE_CHANGE_EVENT("player-gamemode-change-event"),
-    PLAYER_KICK_EVENT("player-kick-event");
+    PLAYER_KICK_EVENT("player-kick-event"),
+    CHAT_EVENT("chat-event"),
+    COMMAND_EVENT("command-event"),
+    ITEM_PICKUP_EVENT("item-pickup-event"),
+    PLAYER_ADVANCEMENT_DONE_EVENT("player-advancement-done-event");
 
     private final String configName;
 

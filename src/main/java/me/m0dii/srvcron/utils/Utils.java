@@ -21,7 +21,7 @@ public class Utils
     {
         StringBuilder result = new StringBuilder();
         
-        String[] split = str.split(" ");
+        String[] split = str.replaceAll("\\{player_name}", p.getName()).split(" ");
     
         for(String s : split)
         {
@@ -38,7 +38,7 @@ public class Utils
             result.append(" ");
         }
         
-        return result.toString().replace("{player_name}", p.getName()).trim();
+        return result.toString().trim();
     }
     
     public static String setPlaceholders(String str, Player p)
