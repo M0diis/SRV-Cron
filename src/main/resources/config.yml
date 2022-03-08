@@ -80,12 +80,15 @@ event-jobs:
       commands:
       - say {player_name} left the game few seconds ago.
   player-gamemode-change-event:
-    cancel:
+    whisper:
       time: 0
       commands:
-      - 'broadcast Player {player_name} changed his gamemode..'
+      - "<ALL+> [TEXT (PERM:staff.notify.gamemode)] Player{player_name} changed his gamemode from {from_gamemode} to {to_gamemode}"
 startup:
   commands:
   - say Server was started!
   - timer 60 say Server is online for 1 minute!
   - save-all
+  - '[LOG <server_startup.log>] Server has been started.'
+
+debug-mode: false

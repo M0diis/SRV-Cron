@@ -256,8 +256,8 @@ public class EventManager implements Listener
             {
                 String command = commands.get(i);
         
-                command = command.replaceAll("\\{to_world_name}", player.getWorld().getName());
-                command = command.replaceAll("\\{from_world_name}", event.getFrom().getName());
+                command = command.replaceAll("\\{to_world}", player.getWorld().getName());
+                command = command.replaceAll("\\{from_world}", event.getFrom().getName());
         
                 commands.set(i, command);
             }
