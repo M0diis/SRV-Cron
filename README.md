@@ -95,7 +95,7 @@ https://github.com/M0diis/SRV-Cron/wiki/API
 ## FAQ
 
 #### I have a feature suggestion | I found a bug
-Please open a Github [issue](https://github.com/M0diis/SRV-Cron/issues) or reach out to me via SpigotMC or, prefferably, [discord](https://discord.gg/ZSzJTSWxmv).
+Please open a Github [issue](https://github.com/M0diis/SRV-Cron/issues) or reach out to me via SpigotMC or, preferably, [discord](https://discord.gg/ZSzJTSWxmv).
 
 #### Where can I download the plugin from?
 You can get it from:
@@ -105,3 +105,8 @@ You can get it from:
 
 #### Can I modify your plugin?
 Yes, you can, as long as you comply with the license. 
+
+#### How can I collaborate on the project?
+- You can find bugs or issues and notify me about them;
+- You can add features or fix issues by forking the project, editing it and creating a Pull Request;
+- You can translate language files and open a Pull Request or send them directly to me.
