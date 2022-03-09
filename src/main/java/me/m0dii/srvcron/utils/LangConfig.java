@@ -2,13 +2,15 @@ package me.m0dii.srvcron.utils;
 
 import me.m0dii.srvcron.SRVCron;
 
+import java.io.File;
+
 public class LangConfig extends AbstractConfig
 {
     private final SRVCron plugin;
     
     public LangConfig(SRVCron plugin)
     {
-        super(plugin.getDataFolder(), "messages.yml", plugin);
+        super(new File(plugin.getDataFolder() + File.separator + "lang"), "messages_en.yml", plugin);
         
         this.plugin = plugin;
     }
@@ -61,5 +63,15 @@ public class LangConfig extends AbstractConfig
     public String getJobDispatched()
     {
         return getString("job-dispatched");
+    }
+    
+    public String getSuspendedAll()
+    {
+        return getString("suspended-all-jobs");
+    }
+    
+    public String getResumedAll()
+    {
+        return getString("resumed-all-jobs");
     }
 }

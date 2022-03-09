@@ -38,6 +38,8 @@ public class CronCommand implements CommandExecutor, TabCompleter
         {
             sendf(sender, "&aSRV-Cron by &2M0dii");
             sendf(sender, "&aVersion: &2" + srvCron.getDescription().getVersion());
+            sendf(sender, "&7/srvcron reload &8- &7reloads the config and jobs.");
+            sendf(sender, "&7/srvcron suspend &8- &7suspends job execution.");
         
             return true;
         }
@@ -110,6 +112,18 @@ public class CronCommand implements CommandExecutor, TabCompleter
         {
             sendf(sender, langCfg.getUsage("suspend"));
     
+            return;
+        }
+        
+        if(args[1].equalsIgnoreCase("all"))
+        {
+            for(CronJob j : srvCron.getJobs().values())
+            {
+                j.suspend();
+            }
+            
+            sendf(sender, langCfg.getSuspendedAll());
+            
             return;
         }
         
@@ -338,6 +352,18 @@ public class CronCommand implements CommandExecutor, TabCompleter
         {
             sendf(sender, langCfg.getUsage("resume"));
     
+            return;
+        }
+    
+        if(args[1].equalsIgnoreCase("all"))
+        {
+            for(CronJob j : srvCron.getJobs().values())
+            {
+                j.resume();
+            }
+        
+            sendf(sender, langCfg.getResumedAll());
+        
             return;
         }
         

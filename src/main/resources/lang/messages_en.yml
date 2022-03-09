@@ -1,13 +1,7 @@
 config-reloaded: '&aConfig has been reloaded successfully.'
 no-permission-command: '&cYou do not have permission to use this command.'
-
-usage:
-  jobinfo: "&cUsage: /srvcron jobinfo <job-name>"
-  joblist: "&cUsage: /srvcron list [events]"
-  run: "&cUsage: /srvcron run <job-name> or /srvcron run event <event-name>"
-  resume: "&cUsage: /srvcron resume <job-name>"
-  suspend: "&cUsage: /srvcron suspend <job-name>"
-
+resumed-all-jobs: '&aAll jobs have been resumed.'
+suspended-all-jobs: '&aAll jobs have been suspended.'
 job-does-not-exist: "&cJob &e{job} &cdoes not exist."
 job-resumed: "&aJob &e{job} &ahas been successfully resumed."
 job-not-suspended: "&cJob &e{job} &cis not suspended."
@@ -15,3 +9,10 @@ job-suspended: "&aJob &e{job} &ahas been successfully suspended."
 job-is-suspended: "&aJob &e{job} &ahas been successfully suspended."
 event-job-executed: "&aEvent-Job &e{job} &acommands have been successfully executed."
 job-dispatched: "&aJob &e{job} &ahas been successfully dispatched."
+
+usage:
+  jobinfo: "&cUsage: /srvcron jobinfo <job-name>"
+  joblist: "&cUsage: /srvcron list [events]"
+  run: "&cUsage: /srvcron run <job-name> or /srvcron run event <event-name>"
+  resume: "&cUsage: /srvcron resume <job-name>"
+  suspend: "&cUsage: /srvcron suspend <job-name>"

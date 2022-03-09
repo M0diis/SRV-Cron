@@ -10,9 +10,9 @@ import java.io.IOException;
 
 public class AbstractConfig
 {
-    final SRVCron plugin;
+    private final SRVCron plugin;
+    private final File file;
     
-    final File file;
     FileConfiguration config;
     
     protected AbstractConfig(File parentFile, String configName, SRVCron plugin)
@@ -20,6 +20,8 @@ public class AbstractConfig
         this.plugin = plugin;
         
         file = new File(parentFile, configName);
+        
+        loadConfig();
     }
     
     protected FileConfiguration loadConfig()
@@ -62,7 +64,7 @@ public class AbstractConfig
         {
             file.getParentFile().mkdirs();
             
-            plugin.saveResource(file.getName(), false);
+            plugin.saveResource("lang" + File.separator + file.getName(), false);
         }
         
         FileConfiguration config = new YamlConfiguration();
