@@ -91,3 +91,4 @@ startup:
 
 debug: false
 silent-start: false
+notify-update: true

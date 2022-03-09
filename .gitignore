@@ -1,7 +1,8 @@
+gradle-app.setting
 .gradle
+.gradletasknamecache
+!gradle-wrapper.jar
 .idea
 /build/
-
-gradle-app.setting
-!gradle-wrapper.jar
-.gradletasknamecache
+/gradle/
+/libs/
