@@ -6,7 +6,7 @@ plugins {
 compileJava.options.encoding = 'UTF-8'
 
 group 'me.m0dii'
-version '2.6.0'
+version '2.7.0'
 
 sourceCompatibility = 8
 targetCompatibility = 8

@@ -5,6 +5,7 @@
 # [TITLE] -> will show a title to a player. A more detailed usage below.
 # [SOUND] -> this will play a sound to the player.
 # [LOG <logname>] -> this will log a message to a log file.
+# [LOG] -> this will send a log message to the console.
 #
 #- <ALL>[PLAYER] will be executed by every online player EXCEPT the player who dispatched the event.
 #- <ALL>[CONSOLE] will be executed by console for every online player. Placeholders will apply to the player.
@@ -71,10 +72,6 @@ event-jobs:
       commands:
       - tell {player_name} Hello!
       - <ALL>[CHAT] Hello {player_name}!
-    hello:
-      time: 5
-      commands:
-      - say Say hello to {player_name}!
   quit-event:
     bye:
       time: 5
@@ -84,7 +81,7 @@ event-jobs:
     whisper:
       time: 0
       commands:
-      - "<ALL> [TEXT (PERM:staff.notify.gamemode)] Player{player_name} changed his gamemode from {from_gamemode} to {to_gamemode}"
+      - "<ALL> [TEXT (PERM:staff.notify.gamemode)] Player {player_name} changed his gamemode from {from_gamemode} to {to_gamemode}"
 startup:
   commands:
   - say Server was started!

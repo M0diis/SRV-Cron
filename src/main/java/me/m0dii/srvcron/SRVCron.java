@@ -7,6 +7,7 @@ import me.m0dii.srvcron.job.EventJob;
 import me.m0dii.srvcron.managers.EventManager;
 import me.m0dii.srvcron.managers.StartupCommandDispatchEvent;
 import me.m0dii.srvcron.utils.EventType;
+import me.m0dii.srvcron.utils.LangConfig;
 import me.m0dii.srvcron.utils.UpdateChecker;
 import me.m0dii.srvcron.utils.Utils;
 import org.bstats.bukkit.Metrics;
@@ -40,6 +41,13 @@ public class SRVCron extends JavaPlugin
     }
     
     private File configFile;
+    
+    private LangConfig langCfg;
+    
+    public LangConfig getLangCfg()
+    {
+        return langCfg;
+    }
                                             
     @Override
     public void onEnable()
@@ -51,6 +59,9 @@ public class SRVCron extends JavaPlugin
         log("Loading configuration...");
         prepareConfig();
         saveConfig();
+        
+        this.langCfg = new LangConfig(this);
+        
         log("Finished loading configuration.");
         
         log("Loading commands...");

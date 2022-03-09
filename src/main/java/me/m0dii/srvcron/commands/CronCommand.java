@@ -4,6 +4,7 @@ import me.m0dii.srvcron.SRVCron;
 import me.m0dii.srvcron.job.CronJob;
 import me.m0dii.srvcron.job.EventJob;
 import me.m0dii.srvcron.managers.CronJobDispatchEvent;
+import me.m0dii.srvcron.utils.LangConfig;
 import me.m0dii.srvcron.utils.Utils;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
@@ -21,10 +22,12 @@ import java.util.List;
 public class CronCommand implements CommandExecutor, TabCompleter
 {
     private final SRVCron srvCron;
+    private final LangConfig langCfg;
 
     public CronCommand(SRVCron srvCron)
     {
         this.srvCron = srvCron;
+        this.langCfg = srvCron.getLangCfg();
     }
 
     @Override
@@ -46,19 +49,15 @@ public class CronCommand implements CommandExecutor, TabCompleter
     
     private void execute(CommandSender sender, String[] args)
     {
-
-    
         if(args[0].equalsIgnoreCase("reload"))
         {
             if(!sender.hasPermission("srvcron.command.reload"))
             {
-                sendf(sender, "&cYou have no permission to execute this command.");
+                sendf(sender, langCfg.getNoPermissionCmd());
             
                 return;
             }
-        
-            sendf(sender, "&aReloading jobs..");
-        
+            
             for(CronJob j : srvCron.getJobs().values())
             {
                 j.stopJob();
@@ -70,8 +69,10 @@ public class CronCommand implements CommandExecutor, TabCompleter
             srvCron.saveConfig();
         
             srvCron.loadJobs();
-        
-            sendf(sender, "&aJobs have been reloaded.");
+            
+            langCfg.reloadConfig();
+    
+            sendf(sender, langCfg.getConfigReloaded());
         }
     
         if(args[0].equalsIgnoreCase("suspend"))
@@ -100,21 +101,21 @@ public class CronCommand implements CommandExecutor, TabCompleter
     {
         if(!sender.hasPermission("srvcron.command.suspend"))
         {
-            sendf(sender, "&cYou have no permission to execute this command.");
+            sendf(sender, langCfg.getNoPermissionCmd());
     
             return;
         }
         
         if(args.length == 1)
         {
-            sendf(sender, "&cUsage: /srvcron suspend <job-name>");
+            sendf(sender, langCfg.getUsage("suspend"));
     
             return;
         }
         
         if(!srvCron.getJobs().containsKey(args[1]))
         {
-            sendf(sender, "&cJob &4\"" + args[1] + "\" &cdoes not exist.");
+            sendf(sender, langCfg.getJobDoesNotExist().replace("{job}", args[1]));
     
             return;
         }
@@ -123,13 +124,13 @@ public class CronCommand implements CommandExecutor, TabCompleter
         
         if(j.isSuspended())
         {
-            sendf(sender, "&cJob &4\"" + args[1] + "\" &cis already suspended.");
+            sendf(sender, langCfg.getJobIsSuspended().replace("{job}", args[1]));
         }
         else
         {
             j.suspend();
         
-            sendf(sender, "&aJob &2\"" + args[1] + "\" &ahas been successfully suspended.");
+            sendf(sender, langCfg.getJobSuspended().replace("{job}", args[1]));
         }
     }
     
@@ -137,14 +138,14 @@ public class CronCommand implements CommandExecutor, TabCompleter
     {
         if(!sender.hasPermission("srvcron.command.run"))
         {
-            sendf(sender, "&cYou have no permission to execute this command.");
+            sendf(sender, langCfg.getNoPermissionCmd());
     
             return;
         }
         
         if(args.length == 1)
         {
-            sendf(sender, "&cUsage: /srvcron run <job-name>");
+            sendf(sender, langCfg.getUsage("run"));
     
             return;
         }
@@ -153,7 +154,7 @@ public class CronCommand implements CommandExecutor, TabCompleter
         {
             if(args.length == 2)
             {
-                sendf(sender, "&cUsage: /srvcron run event <event-name>");
+                sendf(sender, langCfg.getUsage("run"));
                 
                 return;
             }
@@ -175,7 +176,7 @@ public class CronCommand implements CommandExecutor, TabCompleter
             
             if(job == null)
             {
-                sendf(sender, "&cEvent Job &4\"" + args[2] + "\" &cdoes not exist.");
+                sendf(sender, langCfg.getJobDoesNotExist().replace("{job}", args[2]));
                 
                 return;
             }
@@ -202,14 +203,14 @@ public class CronCommand implements CommandExecutor, TabCompleter
     
             srvCron.log("Manually running Event Job " + job.getName() + " by " + sender.getName());
     
-            sendf(sender, "&aEvent Job &2\"" + args[2] + "\" &acommands have been executed.");
+            sendf(sender, langCfg.getEventJobExecuted().replace("{job}", job.getName()));
             
             return;
         }
         
         if(!srvCron.getJobs().containsKey(args[1]))
         {
-            sendf(sender, "&cJob &4\"" + args[1] + "\" &cdoes not exist.");
+            sendf(sender, langCfg.getJobDoesNotExist().replace("{job}", args[1]));
     
             return;
         }
@@ -218,7 +219,7 @@ public class CronCommand implements CommandExecutor, TabCompleter
         
         srvCron.log("Manually running job " + j.getName() + " by " + sender.getName());
     
-        sendf(sender, "&aJob &2\"" + args[2] + "\" &ahas been dispatched.");
+        sendf(sender, langCfg.getJobDispatched().replace("{job}", j.getName()));
     
         Bukkit.getPluginManager().callEvent(new CronJobDispatchEvent(j));
     }
@@ -227,7 +228,7 @@ public class CronCommand implements CommandExecutor, TabCompleter
     {
         if(!sender.hasPermission("srvcron.command.list"))
         {
-            sendf(sender, "&cYou have no permission to execute this command.");
+            sendf(sender, langCfg.getNoPermissionCmd());
     
             return;
         }
@@ -287,21 +288,21 @@ public class CronCommand implements CommandExecutor, TabCompleter
     {
         if(!sender.hasPermission("srvcron.command.jobinfo"))
         {
-            sendf(sender, "&cYou have no permission to execute this command.");
+            sendf(sender, langCfg.getNoPermissionCmd());
     
             return;
         }
         
         if(args.length == 1)
         {
-            sendf(sender, "&cUsage: /cron jobinfo <job-name>");
+            sendf(sender, langCfg.getUsage("jobinfo"));
     
             return;
         }
         
         if(!srvCron.getJobs().containsKey(args[1]))
         {
-            sendf(sender, "&cJob &4\"" + args[1] + "\" &cdoes not exist.");
+            sendf(sender, langCfg.getJobDoesNotExist().replace("{job}", args[1]));
         }
         
         CronJob j = srvCron.getJobs().get(args[1]);
@@ -328,21 +329,21 @@ public class CronCommand implements CommandExecutor, TabCompleter
     {
         if(!sender.hasPermission("srvcron.command.resume"))
         {
-            sendf(sender, "&cYou have no permission to execute this command.");
+            sendf(sender, langCfg.getNoPermissionCmd());
     
             return;
         }
         
         if(args.length == 1)
         {
-            sendf(sender, "&cUsage: /srvcron resume <job-name>");
+            sendf(sender, langCfg.getUsage("resume"));
     
             return;
         }
         
         if(!srvCron.getJobs().containsKey(args[1]))
         {
-            sendf(sender, "&cJob &4\"" + args[1] + "\" &cdoes not exist.");
+            sendf(sender, langCfg.getJobDoesNotExist().replace("{job}", args[1]));
     
             return;
         }
@@ -351,19 +352,24 @@ public class CronCommand implements CommandExecutor, TabCompleter
         
         if(!j.isSuspended())
         {
-            sendf(sender, "&cJob &4\"" + args[1] + "\" &cis not suspended.");
+            sendf(sender, langCfg.getJobNotSuspended().replace("{job}", args[1]));
         }
         else
         {
             j.resume();
         
-            sendf(sender, "&aJob &4\"" + args[1] + "\" &ahas been successfully resumed.");
+            sendf(sender, langCfg.getJobResumed().replace("{job}", args[1]));
         }
     }
     
     private void sendf(CommandSender sender, String msg)
     {
         String m = ChatColor.translateAlternateColorCodes('&', msg);
+        
+        if(sender instanceof Player)
+        {
+            m = Utils.setPlaceholders(m, (Player)sender);
+        }
         
         sender.sendMessage(m);
     }
