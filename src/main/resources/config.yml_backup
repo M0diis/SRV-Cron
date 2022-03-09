@@ -6,14 +6,14 @@
 # [SOUND] -> this will play a sound to the player.
 # [LOG <logname>] -> this will log a message to a log file.
 # [LOG] -> this will send a log message to the console.
-#
+# ---
 #- <ALL>[PLAYER] will be executed by every online player EXCEPT the player who dispatched the event.
 #- <ALL>[CONSOLE] will be executed by console for every online player. Placeholders will apply to the player.
 #- will be executed once via the server console.
-#
+# ---
 # "<ALL+>" in Event-Job will be executed by every online player INCLUDING the player who dispatched the event.
 # Use {placeholder} to apply a placeholder to the player who dispatched the event.
-#
+# ---
 # Detailed explanation:
 # This will play a sound to the player.
 # The first argument is the sound, the second is the volume and the third is the pitch.
@@ -26,13 +26,13 @@
 # Alternatively you can use opt out the subtitle or the times, or just the subtitle.
 #  - '[TITLE] This is a title'
 #  - '[TITLE] This is a title, 20, 60, 20'
-#
+# ---
 # You can also filter out the players using placeholders.
 # - '[PLAYER (%vault_eco_balance% > 1000)] This will only be executed by the player if he has more than 1000 balance.'
 # Same applies to all the other actions, title, message, sound, etc., ex:
 # '[TITLE (%vault_eco_balance% > 1000)] You have more than 1000 balance!'
 # This will send a title to all the players that have more than 1000 balance.
-#
+# ---
 # Available operators:
 # - X less than Y: <
 # - X is greater than Y: >
@@ -40,29 +40,29 @@
 # - X is greater or equal to Y: >=
 # - X is equals to Y: ==
 # - X is not equals to Y: !=
-#
+# ---
 # This works best for placeholders that return numeric values.
 # Operators might work for values that return yes or true, ex.:
 # - '[PLAYER (%player_is_op%)] shout Yay, I'm an OP when this job was executed.'
-#
+# ---
 # You can also check if player has a permission, ex.:
 # - '[PLAYER (PERMISSION:some.permission)] shout You have the permission!'
 jobs:
   save:
     time: every 1 hour
     commands:
-    - say Saving world!
-    - save-all
-    - say Save Complete!
+      - say Saving world!
+      - save-all
+      - say Save Complete!
   restart:
     time: every 1 day of week at 6:00
     commands:
-    - say Server restart in 10 seconds!
-    - timer 10 stop
+      - say Server restart in 10 seconds!
+      - timer 10 stop
   tps:
     time: every 30 minutes
     commands:
-    - tps
+      - tps
 # If you do not want to use any event jobs, use:
 # event-jobs: { }
 event-jobs:
@@ -70,23 +70,24 @@ event-jobs:
     welcome:
       time: 1
       commands:
-      - tell {player_name} Hello!
-      - <ALL>[CHAT] Hello {player_name}!
+        - tell {player_name} Hello!
+        - <ALL>[CHAT] Hello {player_name}!
   quit-event:
     bye:
       time: 5
       commands:
-      - say {player_name} left the game few seconds ago.
+        - say {player_name} left the game few seconds ago.
   player-gamemode-change-event:
     whisper:
       time: 0
       commands:
-      - "<ALL> [TEXT (PERM:staff.notify.gamemode)] Player {player_name} changed his gamemode from {from_gamemode} to {to_gamemode}"
+        - "<ALL> [TEXT (PERM:staff.notify.gamemode)] Player {player_name} changed his gamemode from {from_gamemode} to {to_gamemode}"
 startup:
   commands:
-  - say Server was started!
-  - timer 60 say Server is online for 1 minute!
-  - save-all
-  - '[LOG <server_startup.log>] Server has been started.'
+    - say Server was started!
+    - timer 60 say Server is online for 1 minute!
+    - save-all
+    - '[LOG <server_startup.log>] Server has been started.'
 
 debug: false
+silent-start: false

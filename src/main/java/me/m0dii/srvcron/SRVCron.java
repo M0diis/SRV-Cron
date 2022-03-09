@@ -64,36 +64,44 @@ public class SRVCron extends JavaPlugin
         
         log("Finished loading configuration.");
         
-        log("Loading commands...");
+        logStartup("Loading commands...");
         getCommand("timer").setExecutor(new TimerCommand(this));
         getCommand("srvcron").setExecutor(new CronCommand(this));
-        log("Finished loading commands.");
-        
-        log("Loading jobs...");
+        logStartup("Finished loading commands.");
+    
+        logStartup("Loading jobs...");
         loadJobs();
-        log("Finished loading jobs.");
-
-        log("Creating Event Managers...");
+        logStartup("Finished loading jobs.");
+    
+        logStartup("Creating Event Managers...");
         new EventManager(this);
-        log("Finished loading Event Managers.");
+        logStartup("Finished loading Event Managers.");
     
-        log("Loading metrics...");
+        logStartup("Loading metrics...");
         setupMetrics();
-        log("Finished loading metrics.");
-        
-        log("SRV-Cron has been loaded successfully.");
+        logStartup("Finished loading metrics.");
     
-        log("Running startup commands...");
+        logStartup("SRV-Cron has been loaded successfully.");
+    
+        logStartup("Running startup commands...");
         Bukkit.getPluginManager().callEvent(new StartupCommandDispatchEvent(this));
-        log("Startup commands dispatched.");
-        
-        log("Checking for updates...");
+        logStartup("Startup commands dispatched.");
+    
+
         checkForUpdates();
-        log("Finished checking for updates.");
     }
     
     private void checkForUpdates()
     {
+        logStartup("Checking for updates...");
+        
+        if(!getConfig().getBoolean("notify-update"))
+        {
+            logStartup("Update checking disabled, skipping.");
+            
+            return;
+        }
+        
         new UpdateChecker(this, 100382).getVersion(ver ->
         {
             if (!this.getDescription().getVersion().equalsIgnoreCase(ver))
@@ -101,18 +109,19 @@ public class SRVCron extends JavaPlugin
                 log("You are running an outdated version of SRV-Cron.");
                 log("You are using: " + getDescription().getVersion() + ".");
                 log("Latest version: " + ver + ".");
-                log("");
                 log("You can download the latest version on Spigot:");
                 log("https://www.spigotmc.org/resources/100382/");
             }
         });
+    
+        logStartup("Finished checking for updates.");
     }
     
     private void setupMetrics()
     {
         Metrics metrics = new Metrics(this, 14503);
-        
-        log("Loading custom charts for metrics...");
+    
+        logStartup("Loading custom charts for metrics...");
     
         metrics.addCustomChart(new SingleLineChart("running_jobs", jobs::size));
 
@@ -122,12 +131,12 @@ public class SRVCron extends JavaPlugin
     
         metrics.addCustomChart(new SingleLineChart("running_startup_commands", startUpCommands::size));
     
-        log("Custom charts have been loaded.");
+        logStartup("Custom charts have been loaded.");
     }
     
     public void loadJobs()
     {
-        log("Loading cron jobs....");
+        logStartup("Loading cron jobs....");
     
         ConfigurationSection jobsSection = getConfig().getConfigurationSection("jobs");
     
@@ -139,23 +148,23 @@ public class SRVCron extends JavaPlugin
                 String time = getConfig().getString("jobs." + s + ".time");
         
                 this.jobs.put(s, new CronJob(this, cmds, time, s));
-                log("Created new job: " + s);
+                logStartup("Created new job: " + s);
             }
     
-            log("Successfully loaded jobs " + (this.jobs.size() == 1 ? "job" : "jobs") + ".");
+            logStartup("Successfully loaded jobs " + (this.jobs.size() == 1 ? "job" : "jobs") + ".");
         }
         else
         {
-            log("Configuration section with jobs was not found.");
+            logStartup("Configuration section with jobs was not found.");
         }
     
-        log("Starting cron jobs...");
+        logStartup("Starting cron jobs...");
         
         for(CronJob j : new ArrayList<>(this.jobs.values()))
         {
             try
             {
-                log("Starting job: " + j.getName());
+                logStartup("Starting job: " + j.getName());
                 j.startJob();
             }
             catch(IllegalArgumentException ex)
@@ -163,8 +172,8 @@ public class SRVCron extends JavaPlugin
                 log("Failed to start job " + j.getName() + ": " + ex.getMessage());
             }
         }
-        
-        log("Jobs have been started.");
+    
+        logStartup("Jobs have been started.");
     
         ConfigurationSection eventJobSection = getConfig().getConfigurationSection("event-jobs");
         
@@ -187,8 +196,8 @@ public class SRVCron extends JavaPlugin
                             int time = getConfig().getInt("event-jobs." + s + "." + name + ".time");
                             List<String> cmds = getConfig().getStringList("event-jobs." + s + "." + name + ".commands");
                             jobs.add(new EventJob(this, name, time, cmds, type));
-        
-                            log("Created new event job: " + name + " (" + type.getConfigName() + ")");
+    
+                            logStartup("Created new event job: " + name + " (" + type.getConfigName() + ")");
                         }
     
                         eventJobs.put(type, jobs);
@@ -200,7 +209,7 @@ public class SRVCron extends JavaPlugin
                 }
             }
     
-            log("Event jobs have been registered.");
+            logStartup("Event jobs have been registered.");
         }
         else
         {
@@ -218,11 +227,11 @@ public class SRVCron extends JavaPlugin
             for (String command : cmds)
             {
                 startUpCommands.add(command);
-                
-                log("Created new startup command: " + command);
+    
+                logStartup("Created new startup command: " + command);
             }
     
-            log("Startup commands have been registered.");
+            logStartup("Startup commands have been registered.");
         }
     }
     
@@ -248,12 +257,22 @@ public class SRVCron extends JavaPlugin
         Utils.logToFile("log.txt", msg);
     }
     
+    public void logStartup(String msg)
+    {
+        if(!getConfig().getBoolean("silent-start"))
+        {
+            log(msg);
+        }
+    }
+    
     private void prepareConfig()
     {
         this.configFile = new File(this.getDataFolder(), "config.yml");
         
         if(!this.configFile.exists())
         {
+            getConfig().options().copyDefaults(true);
+            
             this.configFile.getParentFile().mkdirs();
             
             this.copy(this.getResource("config.yml"), this.configFile);
@@ -271,6 +290,8 @@ public class SRVCron extends JavaPlugin
         YamlConfiguration.loadConfiguration(this.configFile);
     
         this.copy(getResource("config.yml_backup"), new File(this.getDataFolder(), "config.yml_backup"));
+    
+        logStartup("Finished loading config.yml");
     }
     
     private void copy(InputStream in, File file)

@@ -51,18 +51,18 @@ jobs:
   save:
     time: every 1 hour
     commands:
-    - say Saving world!
-    - save-all
-    - say Save Complete!
+      - say Saving world!
+      - save-all
+      - say Save Complete!
   restart:
     time: every 1 day of week at 6:00
     commands:
-    - say Server restart in 10 seconds!
-    - timer 10 stop
+      - say Server restart in 10 seconds!
+      - timer 10 stop
   tps:
     time: every 30 minutes
     commands:
-    - tps
+      - tps
 # If you do not want to use any event jobs, use:
 # event-jobs: { }
 event-jobs:
@@ -70,23 +70,24 @@ event-jobs:
     welcome:
       time: 1
       commands:
-      - tell {player_name} Hello!
-      - <ALL>[CHAT] Hello {player_name}!
+        - tell {player_name} Hello!
+        - <ALL>[CHAT] Hello {player_name}!
   quit-event:
     bye:
       time: 5
       commands:
-      - say {player_name} left the game few seconds ago.
+        - say {player_name} left the game few seconds ago.
   player-gamemode-change-event:
     whisper:
       time: 0
       commands:
-      - "<ALL> [TEXT (PERM:staff.notify.gamemode)] Player {player_name} changed his gamemode from {from_gamemode} to {to_gamemode}"
+        - "<ALL> [TEXT (PERM:staff.notify.gamemode)] Player {player_name} changed his gamemode from {from_gamemode} to {to_gamemode}"
 startup:
   commands:
-  - say Server was started!
-  - timer 60 say Server is online for 1 minute!
-  - save-all
-  - '[LOG <server_startup.log>] Server has been started.'
+    - say Server was started!
+    - timer 60 say Server is online for 1 minute!
+    - save-all
+    - '[LOG <server_startup.log>] Server has been started.'
 
 debug: false
+silent-start: false
