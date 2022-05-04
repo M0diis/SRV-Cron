@@ -2,12 +2,12 @@ package me.m0dii.srvcron.utils;
 
 import me.m0dii.srvcron.SRVCron;
 import org.bukkit.Bukkit;
-import org.bukkit.util.Consumer;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Scanner;
+import java.util.function.Consumer;
 
 public class UpdateChecker
 {

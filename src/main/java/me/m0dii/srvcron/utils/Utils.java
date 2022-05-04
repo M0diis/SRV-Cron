@@ -98,8 +98,6 @@ public class Utils
             
             if(!logFolder.exists())
             {
-                debug("Log folder does not exist, creating...");
-                
                 logFolder.mkdir();
             }
             
@@ -107,8 +105,6 @@ public class Utils
             
             if (!saveTo.exists())
             {
-                debug("Log file does not exist, creating...");
-                
                 saveTo.createNewFile();
             }
             
@@ -139,19 +135,7 @@ public class Utils
         
         debug("Command after processing: " + cmd);
         
-        if(cmd.startsWith("[") && onlinePlayer == null)
-        {
-            String sendAs = cmd.substring(cmd.indexOf("["), cmd.indexOf("]") + 1).toUpperCase();
-    
-            cmd = cmd.substring(cmd.indexOf("]") + 1);
-    
-            if(logAction(cmd, sendAs))
-            {
-                return;
-            }
-        }
-        
-        if(cmd.startsWith("[") && onlinePlayer != null)
+        if(cmd.startsWith("["))
         {
             String sendAs = cmd.substring(cmd.indexOf("["), cmd.indexOf("]") + 1).toUpperCase();
             
@@ -159,16 +143,21 @@ public class Utils
             
             debug("Sending command as: " + sendAs);
             
-            
             if(sendAs.contains("(") && sendAs.contains(")"))
             {
                 String cond = sendAs.substring(sendAs.indexOf("(") + 1, sendAs.indexOf(")"));
     
-                debug("Checking condition '" + cond + "' for player " + onlinePlayer.getName());
+                if(onlinePlayer != null)
+                    debug("Checking condition '" + cond + "' for player " + onlinePlayer.getName());
+                else
+                    debug("Checking condition '" + cond + "' without player");
                 
                 if(!matchesFilter(onlinePlayer, cond))
                 {
-                    debug("Condition '" + cond + "' by player " + onlinePlayer.getName() + " not met, skipping command execution.");
+                    if(onlinePlayer != null)
+                        debug("Condition '" + cond + "' by player " + onlinePlayer.getName() + " not met, skipping command execution.");
+                    else
+                        debug("Condition '" + cond + "' without player not met, skipping command execution.");
                     
                     return;
                 }
@@ -328,6 +317,9 @@ public class Utils
     {
         if(cond.toUpperCase().startsWith("PERM") && cond.contains(":"))
         {
+            if(p == null)
+                return true;
+            
             debug("Checking permission condition '" + cond + "' for player '" + p.getName() + "'");
             
             String permission = cond.split(":")[1];
@@ -367,15 +359,32 @@ public class Utils
     
                 switch(op)
                 {
-                    case ">": return left > right;
-                    case "<": return left < right;
+                    case ">":
+                    case "greater_than":
+                        return left > right;
+                    case "<":
+                    case "less_than":
+                        return left < right;
                     
-                    case "<=": return left <= right;
-                    case ">=": return left >= right;
+                    case "<=":
+                    case "less_than_or_equals":
+                    case "less_or_equals":
+                        return left <= right;
+                        
+                    case ">=":
+                    case "greater_or_equals":
+                    case "greater_than_or_equals":
+                        return left >= right;
                     
-                    case "!=": return left != right;
-                    case "==": return left == right;
+                    case "!=":
+                    case "not_equals":
+                        return left != right;
                     
+                    case "==":
+                    case "=":
+                    case "equals":
+                        return left == right;
+    
                     default: return false;
                 }
             }

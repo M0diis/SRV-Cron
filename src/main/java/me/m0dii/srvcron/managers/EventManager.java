@@ -202,32 +202,32 @@ public class EventManager implements Listener
             job.performJob(player, player.getWorld(), event);
     }
     
-    @EventHandler
-    public void onPlayerAdvancementDoneEvent(PlayerAdvancementDoneEvent event)
-    {
-        if (ignore(EventType.PLAYER_ADVANCEMENT_DONE_EVENT))
-            return;
-    
-        Player player = event.getPlayer();
-
-        for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_ADVANCEMENT_DONE_EVENT))
-        {
-            List<String> commands = new ArrayList<>(job.getCommands());
-    
-            for(int i = 0; i < commands.size(); i++)
-            {
-                String command = commands.get(i);
-        
-                command = command.replaceAll("\\{advancement_name}",
-                        event.getAdvancement().getKey().getKey().replace("/", " "));
-        
-                commands.set(i, command);
-            }
-    
-            job.performJob(player, player.getWorld(), event, commands);
-        }
-    }
-    
+//    @EventHandler
+//    public void onPlayerAdvancementDoneEvent(PlayerAdvancementDoneEvent event)
+//    {
+//        if (ignore(EventType.PLAYER_ADVANCEMENT_DONE_EVENT))
+//            return;
+//
+//        Player player = event.getPlayer();
+//
+//        for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_ADVANCEMENT_DONE_EVENT))
+//        {
+//            List<String> commands = new ArrayList<>(job.getCommands());
+//
+//            for(int i = 0; i < commands.size(); i++)
+//            {
+//                String command = commands.get(i);
+//
+//                command = command.replaceAll("\\{advancement_name}",
+//                        event.getAdvancement().getKey().getKey().replace("/", " "));
+//
+//                commands.set(i, command);
+//            }
+//
+//            job.performJob(player, player.getWorld(), event, commands);
+//        }
+//    }
+//
     @EventHandler
     public void onPlayerBedLeaveEvent(PlayerBedLeaveEvent event)
     {
