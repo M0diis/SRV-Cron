@@ -8,9 +8,11 @@ public class LangConfig extends AbstractConfig
 {
     private final SRVCron plugin;
     
-    public LangConfig(SRVCron plugin)
+    public LangConfig(SRVCron plugin, String locale)
     {
-        super(new File(plugin.getDataFolder() + File.separator + "lang"), "messages_en.yml", plugin);
+        super(new File(plugin.getDataFolder() + File.separator + "lang"), "messages_" + locale + ".yml", plugin);
+        
+        plugin.getLogger().info("Loading language file: messages_" + locale + ".yml");
         
         this.plugin = plugin;
     }

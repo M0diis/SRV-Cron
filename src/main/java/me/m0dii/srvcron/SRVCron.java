@@ -57,10 +57,11 @@ public class SRVCron extends JavaPlugin
         log("Loading SRV-Cron...");
         
         log("Loading configuration...");
+        
         prepareConfig();
         saveConfig();
         
-        this.langCfg = new LangConfig(this);
+        this.langCfg = new LangConfig(this, getConfig().getString("locale"));
         
         log("Finished loading configuration.");
         
