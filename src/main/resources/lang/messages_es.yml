@@ -1,0 +1,21 @@
+# Translated to Spanish by zFoxy#1717
+# Traducido al Español por zFoxy#1717
+
+config-reloaded: '&aLa configuración ha sido recargada con éxito.'
+no-permission-command: '&cNo tienes permiso para utilizar este comando.'
+resumed-all-jobs: '&aTodos los trabajos han sido reanudados.'
+suspended-all-jobs: '&aTodos los trabajos han sido suspendidos.'
+job-does-not-exist: '&cEl  trabajo &e{job} &cno existe.'
+job-resumed: '&aEl trabajo &e{job} &aha sido reanudado exitosamente.'
+job-not-suspended: '&cEl trabajo &e{job} &cno está suspendido.'
+job-suspended: '&aEl trabajo &e{job} &aha sido suspendido exitosamente.'
+job-is-suspended: '&aEl trabajo &e{job} &aha sido suspendido exitosamente.'
+event-job-executed: '&aLos comandos del Evento-Trabajo &e{job} &ahan sido ejecutados exitosamente.'
+job-dispatched: '&aEl taabajo &e{job} &aha sido despachado exitosamente.'
+
+usage:
+  jobinfo: '&cUso: /srvcron jobinfo <trabajo-nombre>'
+  joblist: '&cUso: /srvcron list [eventos]'
+  run: '&cUso: /srvcron run <trabajo-nombre> o /srvcron run event <evento-nombre>'
+  resume: '&cUso: /srvcron resume <trabajo-nombre>'
+  suspend: '&cUso: /srvcron suspend <trabajo-nombre>'
