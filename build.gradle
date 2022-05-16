@@ -6,7 +6,7 @@ plugins {
 compileJava.options.encoding = 'UTF-8'
 
 group 'me.m0dii'
-version '2.8.0'
+version '2.9.0'
 
 sourceCompatibility = 8
 targetCompatibility = 8
@@ -57,7 +57,7 @@ repositories {
 dependencies {
     implementation 'org.bstats:bstats-bukkit:3.0.0'
 
-    compileOnly 'com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT'
+    //compileOnly 'com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT'
     compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
     compileOnly 'me.clip:placeholderapi:2.11.1'
 

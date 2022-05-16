@@ -7,10 +7,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class EventJobDispatchEvent extends Event implements Cancellable
@@ -22,7 +19,7 @@ public class EventJobDispatchEvent extends Event implements Cancellable
     private final Player player;
     private final World world;
     
-    private List<String> jobCommands = new ArrayList<>();
+    private List<String> jobCommands;
     
     private boolean isCancelled;
     
@@ -54,7 +51,7 @@ public class EventJobDispatchEvent extends Event implements Cancellable
     }
     
     @Override
-    public @NotNull HandlerList getHandlers()
+    public HandlerList getHandlers()
     {
         return HANDLERS_LIST;
     }
@@ -89,19 +86,16 @@ public class EventJobDispatchEvent extends Event implements Cancellable
         return jobCommands;
     }
     
-    @Nullable
     public Player getPlayer()
     {
         return player;
     }
     
-    @Nullable
     public World getWorld()
     {
         return world;
     }
     
-    @Nullable
     public Event getEvent()
     {
         return event;

@@ -6,7 +6,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -20,7 +19,7 @@ public class Utils
 {
     private static final SRVCron plugin = SRVCron.getInstance();
     
-    public static String handleDispatcherPlaceholders(String str, @NotNull Player p)
+    public static String handleDispatcherPlaceholders(String str, Player p)
     {
         StringBuilder result = new StringBuilder();
         

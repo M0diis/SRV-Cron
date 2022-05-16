@@ -59,8 +59,8 @@ public class EventManager implements Listener
             {
                 String command = commands.get(i);
                 
-                command = command.replaceAll("\\{item_type}", item.getItemStack().getType().name());
-                command = command.replaceAll("\\{item_amount}", String.valueOf(item.getItemStack().getAmount()));
+                command = command.replace("{item_type}", item.getItemStack().getType().name());
+                command = command.replace("{item_amount}", String.valueOf(item.getItemStack().getAmount()));
         
                 commands.set(i, command);
             }
@@ -85,7 +85,7 @@ public class EventManager implements Listener
             {
                 String command = commands.get(i);
         
-                command = command.replaceAll("\\{command}", event.getMessage());
+                command = command.replace("{command}", event.getMessage());
         
                 commands.set(i, command);
             }
@@ -110,7 +110,7 @@ public class EventManager implements Listener
             {
                 String command = commands.get(i);
         
-                command = command.replaceAll("\\{message}", event.getMessage());
+                command = command.replace("{message}", event.getMessage());
 
                 commands.set(i, command);
             }
@@ -134,9 +134,13 @@ public class EventManager implements Listener
             for(int i = 0; i < commands.size(); i++)
             {
                 String command = commands.get(i);
-        
-                command = command.replaceAll("\\{quit_reason}", event.getReason().name());
-        
+    
+                String quitMessage = event.getQuitMessage();
+                
+                if(quitMessage != null) {
+                    command = command.replace("{quit_reason}", quitMessage);
+                }
+
                 commands.set(i, command);
             }
     
@@ -180,8 +184,8 @@ public class EventManager implements Listener
             {
                 String command = commands.get(i);
         
-                command = command.replaceAll("\\{from_gamemode}", player.getGameMode().name());
-                command = command.replaceAll("\\{to_gamemode}", event.getNewGameMode().name());
+                command = command.replace("{from_gamemode}", player.getGameMode().name());
+                command = command.replace("{to_gamemode}", event.getNewGameMode().name());
         
                 commands.set(i, command);
             }
@@ -218,7 +222,7 @@ public class EventManager implements Listener
 //            {
 //                String command = commands.get(i);
 //
-//                command = command.replaceAll("\\{advancement_name}",
+//                command = command.replace("{advancement_name}",
 //                        event.getAdvancement().getKey().getKey().replace("/", " "));
 //
 //                commands.set(i, command);
@@ -256,8 +260,8 @@ public class EventManager implements Listener
             {
                 String command = commands.get(i);
         
-                command = command.replaceAll("\\{to_world}", player.getWorld().getName());
-                command = command.replaceAll("\\{from_world}", event.getFrom().getName());
+                command = command.replace("{to_world}", player.getWorld().getName());
+                command = command.replace("{from_world}", event.getFrom().getName());
         
                 commands.set(i, command);
             }
@@ -282,7 +286,7 @@ public class EventManager implements Listener
             {
                 String command = commands.get(i);
         
-                command = command.replaceAll("\\{kick_reason}", event.getReason());
+                command = command.replace("{kick_reason}", event.getReason());
                 
                 commands.set(i, command);
             }

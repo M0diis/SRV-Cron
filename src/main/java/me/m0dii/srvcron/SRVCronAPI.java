@@ -5,7 +5,6 @@ import me.m0dii.srvcron.job.EventJob;
 import me.m0dii.srvcron.utils.EventType;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -51,7 +50,7 @@ public class SRVCronAPI
                 .findFirst().orElse(null);
     }
     
-    public void runEventJob(EventJob job, @Nullable Player player, @Nullable World world)
+    public void runEventJob(EventJob job, Player player, World world)
     {
         job.performJob(player, world, null);
     }
