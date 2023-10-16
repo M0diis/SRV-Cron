@@ -16,3 +16,8 @@ usage:
   run: "&cUsage: /srvcron run <job-name> or /srvcron run event <event-name>"
   resume: "&cUsage: /srvcron resume <job-name>"
   suspend: "&cUsage: /srvcron suspend <job-name>"
+  help: |-
+    "&aSRV-Cron by &2M0dii"
+    "&aVersion: &2%version%" 
+    "&7/srvcron reload &8- &7reloads the config and jobs."
+    "&7/srvcron suspend &8- &7suspends job execution."

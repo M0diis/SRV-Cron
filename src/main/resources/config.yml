@@ -92,4 +92,5 @@ startup:
 debug: false
 silent-start: false
 notify-update: true
+log-to-file: true
 locale: 'en'

@@ -17,8 +17,7 @@ public class BungeeEventJob {
     private final List<String> commands;
     private final EventType eventType;
 
-    public BungeeEventJob(BungeeSRVCron cron, String name, int time, List<String> commands, EventType eventType)
-    {
+    public BungeeEventJob(BungeeSRVCron cron, String name, int time, List<String> commands, EventType eventType) {
         this.cron = cron;
         this.name = name;
         this.time = time;
@@ -26,17 +25,14 @@ public class BungeeEventJob {
         this.eventType = eventType;
     }
 
-    public void performJob(ProxiedPlayer player)
-    {
+    public void performJob(ProxiedPlayer player) {
         ProxyServer.getInstance().getScheduler().schedule(cron, () ->
         {
-            if(eventType == EventType.JOIN_EVENT && !player.isConnected())
-            {
+            if (eventType == EventType.JOIN_EVENT && !player.isConnected()) {
                 return;
             }
 
-            for(String c : commands)
-            {
+            for (String c : commands) {
                 c = c.replace("{player}", player.getName());
 
                 ProxyServer.getInstance().getPluginManager().dispatchCommand(
@@ -45,13 +41,11 @@ public class BungeeEventJob {
         }, time, TimeUnit.SECONDS);
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public EventType getEventType()
-    {
+    public EventType getEventType() {
         return eventType;
     }
 }

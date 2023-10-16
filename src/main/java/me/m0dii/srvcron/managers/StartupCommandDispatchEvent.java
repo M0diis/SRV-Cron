@@ -7,43 +7,36 @@ import org.bukkit.event.HandlerList;
 
 import java.util.List;
 
-public class StartupCommandDispatchEvent extends Event implements Cancellable
-{
+public class StartupCommandDispatchEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS_LIST = new HandlerList();
-    
+
     private final SRVCron srvCron;
     private boolean isCancelled;
-    
-    public StartupCommandDispatchEvent(SRVCron srvCron)
-    {
+
+    public StartupCommandDispatchEvent(SRVCron srvCron) {
         this.srvCron = srvCron;
     }
 
-    public List<String> getStartupCommands()
-    {
-        return srvCron.getStartupCommands();
+    public List<String> getStartupCommands() {
+        return srvCron.getStartUpCommands();
     }
-    
+
     @Override
-    public HandlerList getHandlers()
-    {
+    public HandlerList getHandlers() {
         return HANDLERS_LIST;
     }
-    
-    public static HandlerList getHandlerList()
-    {
+
+    public static HandlerList getHandlerList() {
         return HANDLERS_LIST;
     }
-    
+
     @Override
-    public boolean isCancelled()
-    {
+    public boolean isCancelled() {
         return isCancelled;
     }
-    
+
     @Override
-    public void setCancelled(boolean cancel)
-    {
+    public void setCancelled(boolean cancel) {
         this.isCancelled = cancel;
     }
 }

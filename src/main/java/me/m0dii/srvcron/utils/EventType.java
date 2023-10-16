@@ -1,7 +1,6 @@
 package me.m0dii.srvcron.utils;
 
-public enum EventType
-{
+public enum EventType {
     JOIN_EVENT("join-event"),
     QUIT_EVENT("quit-event"),
     WEATHER_CHANGE_EVENT("weather-change-event"),
@@ -18,24 +17,20 @@ public enum EventType
 
     private final String configName;
 
-    EventType(String configName)
-    {
+    EventType(String configName) {
         this.configName = configName;
     }
 
-    public String getConfigName()
-    {
+    public String getConfigName() {
         return configName;
     }
 
-    public static EventType isEventJob(String string)
-    {
-        for(EventType type : values())
-        {
-            if(type.getConfigName().equalsIgnoreCase(string))
+    public static EventType isEventJob(String string) {
+        for (EventType type : values()) {
+            if (type.getConfigName().equalsIgnoreCase(string))
                 return type;
         }
-        
+
         return null;
     }
 }

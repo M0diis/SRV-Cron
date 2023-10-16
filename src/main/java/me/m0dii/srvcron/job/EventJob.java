@@ -11,107 +11,87 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.List;
 
-public class EventJob
-{
+public class EventJob {
     private final SRVCron SRVCron;
     private final String name;
     private final int time;
     private final List<String> commands;
     private final EventType eventType;
-    
+
     private boolean suspended = false;
     private int runCount;
 
-    public EventJob(SRVCron SRVCron, String name, int time, List<String> commands, EventType eventType)
-    {
+    public EventJob(SRVCron SRVCron, String name, int time, List<String> commands, EventType eventType) {
         this.SRVCron = SRVCron;
         this.name = name;
         this.time = time;
         this.commands = commands;
         this.eventType = eventType;
     }
-    
-    public void performJob(Player player)
-    {
+
+    public void performJob(Player player) {
         performJob(player, null, null);
     }
-    
-    public void performJob(World world)
-    {
+
+    public void performJob(World world) {
         performJob(null, world, null);
     }
-    
-    public void performJob(Player player, World world, Event event, List<String> commands)
-    {
-        if(eventType == EventType.JOIN_EVENT && !player.isOnline())
+
+    public void performJob(Player player, World world, Event event, List<String> commands) {
+        if (eventType == EventType.JOIN_EVENT && !player.isOnline())
             return;
-    
-        if(this.suspended)
-        {
+
+        if (this.suspended) {
             this.SRVCron.log("Job " + EventJob.this.name + " is suspended, skipping...");
-        
+
             return;
         }
-    
-        if(time == 0)
-        {
+
+        if (time == 0) {
             Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(this, event, player, world, commands));
-        }
-        else
-        {
-            new BukkitRunnable()
-            {
+        } else {
+            new BukkitRunnable() {
                 @Override
-                public void run()
-                {
+                public void run() {
                     Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, event, player, world, commands));
                 }
             }.runTaskLater(SRVCron, time * 20L);
         }
     }
 
-    public void performJob(Player player, World world, Event event)
-    {
+    public void performJob(Player player, World world, Event event) {
         performJob(player, world, event, commands);
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public EventType getEventType()
-    {
+    public EventType getEventType() {
         return eventType;
     }
-    
-    public List<String> getCommands()
-    {
+
+    public List<String> getCommands() {
         return commands;
     }
-    
-    public int getRunCount()
-    {
+
+    public int getRunCount() {
         return runCount;
     }
-    
-    public void increaseRunCount()
-    {
+
+    public void increaseRunCount() {
         runCount++;
     }
-    
-    public void suspend()
-    {
+
+    public void suspend() {
         suspended = true;
     }
-    
-    public void resume()
-    {
+
+    public void resume() {
         suspended = false;
     }
-    
-    public boolean isSuspended()
-    {
+
+    public boolean isSuspended() {
         return suspended;
     }
 }

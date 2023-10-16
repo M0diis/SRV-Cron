@@ -25,12 +25,9 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
 @SuppressWarnings({"WeakerAccess", "unused"})
-public class BungeeMetrics
-{
-    static
-    {
-        if (System.getProperty("bstats.relocatecheck") == null || !System.getProperty("bstats.relocatecheck").equals("false"))
-        {
+public class BungeeMetrics {
+    static {
+        if (System.getProperty("bstats.relocatecheck") == null || !System.getProperty("bstats.relocatecheck").equals("false")) {
             final String defaultPackage = new String(
                     new byte[]{'o', 'r', 'g', '.', 'b', 's', 't', 'a', 't', 's', '.', 'b', 'u', 'n', 'g', 'e', 'e', 'c', 'o', 'r', 'd'});
             final String examplePackage = new String(new byte[]{'m', 'e', '.', 'm', '0', 'd', 'i', 'i'});
@@ -71,40 +68,32 @@ public class BungeeMetrics
     // A list with all custom charts
     private final List<CustomChart> charts = new ArrayList<>();
 
-    public BungeeMetrics(Plugin plugin)
-    {
+    public BungeeMetrics(Plugin plugin) {
         this.plugin = plugin;
 
-        try
-        {
+        try {
             loadConfig();
-        }
-        catch (IOException ex)
-        {
+        } catch (IOException ex) {
             plugin.getLogger().log(Level.WARNING, "Failed to load bStats config!", ex);
-            
+
             return;
         }
-        
-        if (!enabled)
-        {
+
+        if (!enabled) {
             return;
         }
 
         Class<?> usedMetricsClass = getFirstBStatsClass();
-        
-        if (usedMetricsClass == null)
-        {
+
+        if (usedMetricsClass == null) {
             return;
         }
-        
+
         if (usedMetricsClass == getClass()) {
-            
+
             linkMetrics(this);
             startSubmitting();
-        }
-        else
-        {
+        } else {
             try {
                 usedMetricsClass.getMethod("linkMetrics", Object.class).invoke(null, this);
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -129,13 +118,11 @@ public class BungeeMetrics
      *
      * @param chart The chart to add.
      */
-    public void addCustomChart(CustomChart chart)
-    {
-        if (chart == null)
-        {
+    public void addCustomChart(CustomChart chart) {
+        if (chart == null) {
             plugin.getLogger().log(Level.WARNING, "Chart cannot be null");
         }
-        
+
         charts.add(chart);
     }
 
@@ -145,8 +132,7 @@ public class BungeeMetrics
      *
      * @param metrics An object of the metrics class to link.
      */
-    public static void linkMetrics(Object metrics)
-    {
+    public static void linkMetrics(Object metrics) {
         knownMetricsInstances.add(metrics);
     }
 
@@ -156,8 +142,7 @@ public class BungeeMetrics
      *
      * @return The plugin specific data.
      */
-    public JsonObject getPluginData()
-    {
+    public JsonObject getPluginData() {
         JsonObject data = new JsonObject();
 
         String pluginName = plugin.getDescription().getName();
@@ -194,8 +179,7 @@ public class BungeeMetrics
      *
      * @return The server specific data.
      */
-    private JsonObject getServerData()
-    {
+    private JsonObject getServerData() {
         // Minecraft specific data
         int playerAmount = plugin.getProxy().getOnlineCount();
         playerAmount = Math.min(playerAmount, 500);
@@ -242,7 +226,8 @@ public class BungeeMetrics
                 if (plugin instanceof JsonObject) {
                     pluginData.add((JsonObject) plugin);
                 }
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) { }
+            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+            }
         }
 
         data.add("plugins", pluginData);
@@ -263,8 +248,7 @@ public class BungeeMetrics
      *
      * @throws IOException If something did not work :(
      */
-    private void loadConfig() throws IOException
-    {
+    private void loadConfig() throws IOException {
         Path configPath = plugin.getDataFolder().toPath().getParent().resolve("bStats");
         configPath.toFile().mkdirs();
         File configFile = new File(configPath.toFile(), "config.yml");
@@ -282,7 +266,7 @@ public class BungeeMetrics
         }
 
         Configuration configuration = ConfigurationProvider.getProvider(YamlConfiguration.class).load(configFile);
-        
+
         enabled = configuration.getBoolean("enabled", true);
         serverUUID = configuration.getString("serverUuid");
         logFailedRequests = configuration.getBoolean("logFailedRequests", false);
@@ -295,8 +279,7 @@ public class BungeeMetrics
      *
      * @return The first bStats metrics class.
      */
-    private Class<?> getFirstBStatsClass()
-    {
+    private Class<?> getFirstBStatsClass() {
         Path configPath = plugin.getDataFolder().toPath().getParent().resolve("bStats");
         configPath.toFile().mkdirs();
         File tempFile = new File(configPath.toFile(), "temp.txt");
@@ -307,7 +290,8 @@ public class BungeeMetrics
                 try {
                     // Let's check if a class with the given name exists.
                     return Class.forName(className);
-                } catch (ClassNotFoundException ignored) { }
+                } catch (ClassNotFoundException ignored) {
+                }
             }
             writeFile(tempFile, getClass().getName());
             return getClass();
@@ -341,7 +325,7 @@ public class BungeeMetrics
     /**
      * Writes a String to a file. It also adds a note for the user,
      *
-     * @param file The file to write to. Cannot be null.
+     * @param file  The file to write to. Cannot be null.
      * @param lines The lines to write.
      * @throws IOException If something did not work :(
      */
@@ -364,7 +348,7 @@ public class BungeeMetrics
      * Sends the data to the bStats server.
      *
      * @param plugin Any plugin. It's just used to get a logger instance.
-     * @param data The data to send.
+     * @param data   The data to send.
      * @throws Exception If the request failed.
      */
     private static void sendData(Plugin plugin, JsonObject data) throws Exception {
@@ -482,7 +466,7 @@ public class BungeeMetrics
         /**
          * Class constructor.
          *
-         * @param chartId The id of the chart.
+         * @param chartId  The id of the chart.
          * @param callable The callable which is used to request the chart data.
          */
         public SimplePie(String chartId, Callable<String> callable) {
@@ -513,7 +497,7 @@ public class BungeeMetrics
         /**
          * Class constructor.
          *
-         * @param chartId The id of the chart.
+         * @param chartId  The id of the chart.
          * @param callable The callable which is used to request the chart data.
          */
         public AdvancedPie(String chartId, Callable<Map<String, Integer>> callable) {
@@ -557,7 +541,7 @@ public class BungeeMetrics
         /**
          * Class constructor.
          *
-         * @param chartId The id of the chart.
+         * @param chartId  The id of the chart.
          * @param callable The callable which is used to request the chart data.
          */
         public DrilldownPie(String chartId, Callable<Map<String, Map<String, Integer>>> callable) {
@@ -606,7 +590,7 @@ public class BungeeMetrics
         /**
          * Class constructor.
          *
-         * @param chartId The id of the chart.
+         * @param chartId  The id of the chart.
          * @param callable The callable which is used to request the chart data.
          */
         public SingleLineChart(String chartId, Callable<Integer> callable) {
@@ -638,7 +622,7 @@ public class BungeeMetrics
         /**
          * Class constructor.
          *
-         * @param chartId The id of the chart.
+         * @param chartId  The id of the chart.
          * @param callable The callable which is used to request the chart data.
          */
         public MultiLineChart(String chartId, Callable<Map<String, Integer>> callable) {
@@ -683,7 +667,7 @@ public class BungeeMetrics
         /**
          * Class constructor.
          *
-         * @param chartId The id of the chart.
+         * @param chartId  The id of the chart.
          * @param callable The callable which is used to request the chart data.
          */
         public SimpleBarChart(String chartId, Callable<Map<String, Integer>> callable) {
@@ -721,7 +705,7 @@ public class BungeeMetrics
         /**
          * Class constructor.
          *
-         * @param chartId The id of the chart.
+         * @param chartId  The id of the chart.
          * @param callable The callable which is used to request the chart data.
          */
         public AdvancedBarChart(String chartId, Callable<Map<String, int[]>> callable) {
