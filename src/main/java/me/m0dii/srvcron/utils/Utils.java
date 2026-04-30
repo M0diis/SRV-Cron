@@ -16,7 +16,25 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 public class Utils {
-    private static final SRVCron plugin = SRVCron.getInstance();
+    private static SRVCron plugin() {
+        return SRVCron.getInstance();
+    }
+
+    private static boolean isPlaceholderApiEnabled() {
+        return Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null;
+    }
+
+    private static String applyPlaceholderApi(Player player, String text) {
+        if (!isPlaceholderApiEnabled()) {
+            return text;
+        }
+
+        try {
+            return PlaceholderAPI.setPlaceholders(player, text);
+        } catch (NoClassDefFoundError ignored) {
+            return text;
+        }
+    }
 
     public static String handleDispatcherPlaceholders(String str, Player p) {
         StringBuilder result = new StringBuilder();
@@ -26,7 +44,7 @@ public class Utils {
         for (String s : split) {
             if (s.startsWith("{") && s.endsWith("}")) {
                 String placeholder = s.replaceAll("[{}]", "%");
-                result.append(PlaceholderAPI.setPlaceholders(p, placeholder));
+                result.append(applyPlaceholderApi(p, placeholder));
             } else {
                 result.append(s);
             }
@@ -38,6 +56,8 @@ public class Utils {
     }
 
     public static String setPlaceholders(String str, Player p) {
+        SRVCron plugin = plugin();
+
         debug("Setting placeholders in: " + str + " for player: " + (p == null ? "null" : p.getName()));
 
         str = str.trim();
@@ -46,8 +66,8 @@ public class Utils {
             str = str.replace("%player_name%", p.getName());
         }
 
-        if (plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
-            str = PlaceholderAPI.setPlaceholders(p, str);
+        if (plugin != null && isPlaceholderApiEnabled()) {
+            str = applyPlaceholderApi(p, str);
         }
 
         debug("Text after setting placeholders: " + str);
@@ -85,13 +105,19 @@ public class Utils {
 //        }
 
         try {
-            File logFolder = SRVCron.getInstance().getDataFolder();
+            SRVCron plugin = plugin();
+
+            if (plugin == null) {
+                return;
+            }
+
+            File logFolder = plugin.getDataFolder();
 
             if (!logFolder.exists()) {
                 logFolder.mkdir();
             }
 
-            File saveTo = new File(SRVCron.getInstance().getDataFolder(), file);
+            File saveTo = new File(plugin.getDataFolder(), file);
 
             if (!saveTo.exists()) {
                 saveTo.createNewFile();
@@ -115,6 +141,8 @@ public class Utils {
     }
 
     public static void sendCommand(Player onlinePlayer, String cmd) {
+        SRVCron plugin = plugin();
+
         debug("Command before processing: " + cmd);
 
         cmd = setPlaceholders(cmd, onlinePlayer);
@@ -150,13 +178,13 @@ public class Utils {
                 return;
             }
 
-            if (sendAs.startsWith("[MESSAGE") || sendAs.startsWith("[TEXT")) {
+            if (onlinePlayer != null && (sendAs.startsWith("[MESSAGE") || sendAs.startsWith("[TEXT"))) {
                 onlinePlayer.sendMessage(format(cmd));
 
                 return;
             }
 
-            if (sendAs.startsWith("[TITLE")) {
+            if (onlinePlayer != null && sendAs.startsWith("[TITLE")) {
                 String[] split = cmd.split(", ");
 
                 int fadeIn = 20;
@@ -176,7 +204,9 @@ public class Utils {
                             stay = Integer.parseInt(split[2]);
                             fadeOut = Integer.parseInt(split[3]);
                         } catch (NumberFormatException ex) {
-                            plugin.log("Invalid fadeIn, stay, or fadeOut time for title action.");
+                            if (plugin != null) {
+                                plugin.log("Invalid fadeIn, stay, or fadeOut time for title action.");
+                            }
                         }
 
                         onlinePlayer.sendTitle(split[0], "", fadeIn, stay, fadeOut);
@@ -188,7 +218,9 @@ public class Utils {
                             stay = Integer.parseInt(split[3]);
                             fadeOut = Integer.parseInt(split[4]);
                         } catch (NumberFormatException ex) {
-                            plugin.log("Invalid fadeIn, stay, or fadeOut time for title action.");
+                            if (plugin != null) {
+                                plugin.log("Invalid fadeIn, stay, or fadeOut time for title action.");
+                            }
                         }
                         onlinePlayer.sendTitle(split[0], subtitle, fadeIn, stay, fadeOut);
                         break;
@@ -197,18 +229,20 @@ public class Utils {
                 }
             }
 
-            if (sendAs.startsWith("[CHAT")) {
+            if (onlinePlayer != null && sendAs.startsWith("[CHAT")) {
                 onlinePlayer.chat(cmd);
             }
 
-            if (sendAs.startsWith("[SOUND")) {
+            if (onlinePlayer != null && sendAs.startsWith("[SOUND")) {
                 String[] split = cmd.split(", ");
 
                 if (split.length == 2) {
                     try {
                         onlinePlayer.playSound(onlinePlayer.getLocation(), Sound.valueOf(split[0]), Float.parseFloat(split[1]), Float.parseFloat(split[1]));
                     } catch (Exception ex) {
-                        plugin.log("Invalid sound format: " + cmd);
+                        if (plugin != null) {
+                            plugin.log("Invalid sound format: " + cmd);
+                        }
                     }
                 }
             }
@@ -222,7 +256,9 @@ public class Utils {
     }
 
     public static void debug(String message) {
-        if (plugin.getConfig().getBoolean("debug")) {
+        SRVCron plugin = plugin();
+
+        if (plugin != null && plugin.getConfig().getBoolean("debug")) {
             logToFile("debug.log", message);
 
             String prefix = "&3[&bSRV-Cron - DEBUG&3]&r ";
@@ -301,10 +337,10 @@ public class Utils {
                     }
                 }
 
-                double left = Double.parseDouble(PlaceholderAPI.setPlaceholders(p, leftStr)
+                double left = Double.parseDouble(applyPlaceholderApi(p, leftStr)
                         .replaceAll("[a-zA-Z!@#$&*()/\\\\\\[\\]{}:\"?]", ""));
 
-                double right = Double.parseDouble(PlaceholderAPI.setPlaceholders(p, rightStr)
+                double right = Double.parseDouble(applyPlaceholderApi(p, rightStr)
                         .replaceAll("[a-zA-Z!@#$&*()/\\\\\\[\\]{}:\"?]", ""));
 
                 debug("Checking condition after parse: " + leftStr + " " + op + " " + rightStr);
@@ -340,12 +376,16 @@ public class Utils {
                         return false;
                 }
             } catch (NumberFormatException ex) {
-                plugin.log("Failed to parse the condition: " + cond);
+                SRVCron plugin = plugin();
+
+                if (plugin != null) {
+                    plugin.log("Failed to parse the condition: " + cond);
+                }
             }
 
             return false;
         } else {
-            String result = PlaceholderAPI.setPlaceholders(p, cond).toLowerCase();
+            String result = applyPlaceholderApi(p, cond).toLowerCase();
 
             return result.equals("yes") || result.equals("true");
         }

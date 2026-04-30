@@ -19,6 +19,8 @@ public class BungeeCronCommand extends Command {
         if (args.length == 0) {
             sender.sendMessage("§aSRV-Cron system by §eM0dii");
             sender.sendMessage("§aSRV-Cron version: §e" + cron.getDescription().getVersion());
+
+            return;
         }
 
         if (args[0].equalsIgnoreCase("reload")) {
