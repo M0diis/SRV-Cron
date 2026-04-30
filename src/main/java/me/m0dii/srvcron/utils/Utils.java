@@ -56,8 +56,6 @@ public class Utils {
     }
 
     public static String setPlaceholders(String str, Player p) {
-        SRVCron plugin = plugin();
-
         debug("Setting placeholders in: " + str + " for player: " + (p == null ? "null" : p.getName()));
 
         str = str.trim();
@@ -66,7 +64,7 @@ public class Utils {
             str = str.replace("%player_name%", p.getName());
         }
 
-        if (plugin != null && isPlaceholderApiEnabled()) {
+        if (isPlaceholderApiEnabled()) {
             str = applyPlaceholderApi(p, str);
         }
 
