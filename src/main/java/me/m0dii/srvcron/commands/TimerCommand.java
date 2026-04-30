@@ -24,7 +24,14 @@ public class TimerCommand implements CommandExecutor {
             return true;
         }
 
-        if (args.length < 2) {
+        if (args.length == 0) {
+            sender.sendMessage("§aUsage: /timer <time> <command>");
+
+            return true;
+        }
+
+        if (args.length == 1) {
+            sender.sendMessage("§cMissing command argument.");
             sender.sendMessage("§aUsage: /timer <time> <command>");
 
             return true;

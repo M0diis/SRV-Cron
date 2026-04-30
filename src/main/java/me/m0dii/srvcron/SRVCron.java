@@ -126,7 +126,7 @@ public class SRVCron extends JavaPlugin {
     public void loadJobs() {
         logStartup("Loading cron jobs....");
 
-        for (CronJob job : new ArrayList<>(jobs.values())) {
+        for (CronJob job : jobs.values()) {
             job.stopJob();
         }
 

@@ -29,11 +29,7 @@ public class Utils {
             return text;
         }
 
-        try {
-            return PlaceholderAPI.setPlaceholders(player, text);
-        } catch (NoClassDefFoundError ignored) {
-            return text;
-        }
+        return PlaceholderAPI.setPlaceholders(player, text);
     }
 
     public static String handleDispatcherPlaceholders(String str, Player p) {

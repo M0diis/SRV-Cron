@@ -105,7 +105,7 @@ public class BungeeSRVCron extends Plugin {
     public void loadJobs() {
         log("Loading cron jobs....");
 
-        for (BungeeCronJob job : new ArrayList<>(jobs.values())) {
+        for (BungeeCronJob job : jobs.values()) {
             job.stopJob();
         }
 
