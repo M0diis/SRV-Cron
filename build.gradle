@@ -41,6 +41,10 @@ repositories {
     }
 
     maven {
+        url = 'https://repo.extendedclip.com/releases/'
+    }
+
+    maven {
         url = 'https://ci.ender.zone/plugin/repository/everything/'
     }
 
@@ -56,8 +60,9 @@ repositories {
 dependencies {
     implementation 'org.bstats:bstats-bukkit:3.0.0'
 
+    //compileOnly 'com.destroystokyo.paper:paper-api:1.16.5-R0.1-SNAPSHOT'
     compileOnly 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
-    compileOnly 'me.clip:placeholderapi:2.11.1'
+    compileOnly 'me.clip:placeholderapi:2.11.6'
 
     compileOnly 'net.md-5:bungeecord-api:1.21-R0.1'
 
