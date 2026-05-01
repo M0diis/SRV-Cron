@@ -7,9 +7,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.time.Instant;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Objects;
 
 public class CronJob {
     private final SRVCron SRVCron;
@@ -21,6 +21,7 @@ public class CronJob {
     private int calDayMonth = 0;
     private int calDayWeek = 0;
     private String clockTime = "";
+    private long lastClockRunMinuteKey = -1;
     private BukkitTask task;
 
     private boolean suspended = false;
@@ -41,12 +42,26 @@ public class CronJob {
             public void run() {
                 t--;
                 if (cal != null) {
-                    if (t <= 0) {
-                        getTimer();
-
-                        if (!Objects.equals(clockTime, "") && !Utils.isTime(clockTime)) {
+                    if (!clockTime.isEmpty()) {
+                        if (!Utils.isTime(clockTime)) {
                             return;
                         }
+
+                        long nowMinuteKey = getNowMinuteKey();
+
+                        if (nowMinuteKey == lastClockRunMinuteKey) {
+                            return;
+                        }
+
+                        if (calDayMonth != 0 && cal.get(Calendar.DAY_OF_MONTH) == calDayMonth) {
+                            runCommands();
+                            lastClockRunMinuteKey = nowMinuteKey;
+                        } else if (calDayWeek != 0 && cal.get(Calendar.DAY_OF_WEEK) == calDayWeek) {
+                            runCommands();
+                            lastClockRunMinuteKey = nowMinuteKey;
+                        }
+                    } else if (t <= 0) {
+                        getTimer();
 
                         if (calDayMonth != 0 && cal.get(Calendar.DAY_OF_MONTH) == calDayMonth) {
                             runCommands();
@@ -58,7 +73,21 @@ public class CronJob {
                     return;
                 }
 
-                if (!Objects.equals(clockTime, "") && !Utils.isTime(clockTime)) {
+                if (!clockTime.isEmpty()) {
+                    if (!Utils.isTime(clockTime)) {
+                        return;
+                    }
+
+                    long nowMinuteKey = getNowMinuteKey();
+
+                    if (nowMinuteKey == lastClockRunMinuteKey) {
+                        return;
+                    }
+
+                    runCommands();
+                    lastClockRunMinuteKey = nowMinuteKey;
+                    getTimer();
+
                     return;
                 }
 
@@ -88,10 +117,10 @@ public class CronJob {
 
             if (args[2].contains("day") && args[4].contains("month")) {
                 calDayMonth = Integer.parseInt(args[1]);
-                t = Objects.equals(clockTime, "") ? ((20 * 60) * 60) : 61;
+                t = clockTime.isEmpty() ? ((20 * 60) * 60) : 61;
             } else if (args[2].contains("day") && args[4].contains("week")) {
                 calDayWeek = Integer.parseInt(args[1]) + 1;
-                t = Objects.equals(clockTime, "") ? ((20 * 60) * 60) : 61;
+                t = clockTime.isEmpty() ? ((20 * 60) * 60) : 61;
             } else {
                 throw new IllegalArgumentException("Invalid Time format: '" + time + "'");
             }
@@ -168,5 +197,9 @@ public class CronJob {
 
     public boolean isSuspended() {
         return suspended;
+    }
+
+    private long getNowMinuteKey() {
+        return Instant.now().getEpochSecond() / 60;
     }
 }

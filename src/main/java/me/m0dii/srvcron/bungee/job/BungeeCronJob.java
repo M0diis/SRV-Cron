@@ -4,10 +4,10 @@ import me.m0dii.srvcron.bungee.BungeeSRVCron;
 import me.m0dii.srvcron.utils.Utils;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 public class BungeeCronJob {
@@ -21,6 +21,7 @@ public class BungeeCronJob {
     private int calDayMonth = 0;
     private int calDayWeek = 0;
     private String clockTime = "";
+    private long lastClockRunMinuteKey = -1;
     private ScheduledTask task;
 
     public BungeeCronJob(BungeeSRVCron cron, List<String> cmds, String time, String name) {
@@ -38,12 +39,26 @@ public class BungeeCronJob {
             t--;
 
             if (cal != null) {
-                if (t <= 0) {
-                    getTimer();
-
-                    if (!Objects.equals(clockTime, "") && !Utils.isTime(clockTime)) {
+                if (!clockTime.isEmpty()) {
+                    if (!Utils.isTime(clockTime)) {
                         return;
                     }
+
+                    long nowMinuteKey = getNowMinuteKey();
+
+                    if (nowMinuteKey == lastClockRunMinuteKey) {
+                        return;
+                    }
+
+                    if (calDayMonth != 0 && cal.get(Calendar.DAY_OF_MONTH) == calDayMonth) {
+                        runCommands();
+                        lastClockRunMinuteKey = nowMinuteKey;
+                    } else if (calDayWeek != 0 && cal.get(Calendar.DAY_OF_WEEK) == calDayWeek) {
+                        runCommands();
+                        lastClockRunMinuteKey = nowMinuteKey;
+                    }
+                } else if (t <= 0) {
+                    getTimer();
 
                     if (calDayMonth != 0 && cal.get(Calendar.DAY_OF_MONTH) == calDayMonth) {
                         runCommands();
@@ -53,7 +68,21 @@ public class BungeeCronJob {
                 }
                 return;
             }
-            if (!Objects.equals(clockTime, "") && !Utils.isTime(clockTime)) {
+            if (!clockTime.isEmpty()) {
+                if (!Utils.isTime(clockTime)) {
+                    return;
+                }
+
+                long nowMinuteKey = getNowMinuteKey();
+
+                if (nowMinuteKey == lastClockRunMinuteKey) {
+                    return;
+                }
+
+                runCommands();
+                lastClockRunMinuteKey = nowMinuteKey;
+                getTimer();
+
                 return;
             }
 
@@ -82,10 +111,10 @@ public class BungeeCronJob {
 
             if (args[2].contains("day") && args[4].contains("month")) {
                 calDayMonth = Integer.parseInt(args[1]);
-                t = Objects.equals(clockTime, "") ? ((20 * 60) * 60) : 61;
+                t = clockTime.isEmpty() ? ((20 * 60) * 60) : 61;
             } else if (args[2].contains("day") && args[4].contains("week")) {
                 calDayWeek = Integer.parseInt(args[1]) + 1;
-                t = Objects.equals(clockTime, "") ? ((20 * 60) * 60) : 61;
+                t = clockTime.isEmpty() ? ((20 * 60) * 60) : 61;
             } else {
                 throw new IllegalArgumentException("Invalid Time format: '" + time + "'");
             }
@@ -144,5 +173,9 @@ public class BungeeCronJob {
 
     public List<String> getCommands() {
         return cmds;
+    }
+
+    private long getNowMinuteKey() {
+        return Instant.now().getEpochSecond() / 60;
     }
 }
