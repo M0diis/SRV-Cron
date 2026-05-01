@@ -21,6 +21,7 @@ public class CronJob {
     private int calDayMonth = 0;
     private int calDayWeek = 0;
     private String clockTime = "";
+    private int lastClockRunMinuteKey = -1;
     private BukkitTask task;
 
     private boolean suspended = false;
@@ -41,12 +42,26 @@ public class CronJob {
             public void run() {
                 t--;
                 if (cal != null) {
-                    if (t <= 0) {
-                        getTimer();
-
-                        if (!Objects.equals(clockTime, "") && !Utils.isTime(clockTime)) {
+                    if (!Objects.equals(clockTime, "")) {
+                        if (!Utils.isTime(clockTime)) {
                             return;
                         }
+
+                        int nowMinuteKey = getNowMinuteKey();
+
+                        if (nowMinuteKey == lastClockRunMinuteKey) {
+                            return;
+                        }
+
+                        if (calDayMonth != 0 && cal.get(Calendar.DAY_OF_MONTH) == calDayMonth) {
+                            runCommands();
+                            lastClockRunMinuteKey = nowMinuteKey;
+                        } else if (calDayWeek != 0 && cal.get(Calendar.DAY_OF_WEEK) == calDayWeek) {
+                            runCommands();
+                            lastClockRunMinuteKey = nowMinuteKey;
+                        }
+                    } else if (t <= 0) {
+                        getTimer();
 
                         if (calDayMonth != 0 && cal.get(Calendar.DAY_OF_MONTH) == calDayMonth) {
                             runCommands();
@@ -58,7 +73,21 @@ public class CronJob {
                     return;
                 }
 
-                if (!Objects.equals(clockTime, "") && !Utils.isTime(clockTime)) {
+                if (!Objects.equals(clockTime, "")) {
+                    if (!Utils.isTime(clockTime)) {
+                        return;
+                    }
+
+                    int nowMinuteKey = getNowMinuteKey();
+
+                    if (nowMinuteKey == lastClockRunMinuteKey) {
+                        return;
+                    }
+
+                    runCommands();
+                    lastClockRunMinuteKey = nowMinuteKey;
+                    getTimer();
+
                     return;
                 }
 
@@ -168,5 +197,10 @@ public class CronJob {
 
     public boolean isSuspended() {
         return suspended;
+    }
+
+    private int getNowMinuteKey() {
+        Calendar now = Calendar.getInstance();
+        return (now.get(Calendar.DAY_OF_YEAR) * 1440) + (now.get(Calendar.HOUR_OF_DAY) * 60) + now.get(Calendar.MINUTE);
     }
 }

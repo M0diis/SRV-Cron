@@ -21,6 +21,7 @@ public class BungeeCronJob {
     private int calDayMonth = 0;
     private int calDayWeek = 0;
     private String clockTime = "";
+    private int lastClockRunMinuteKey = -1;
     private ScheduledTask task;
 
     public BungeeCronJob(BungeeSRVCron cron, List<String> cmds, String time, String name) {
@@ -38,12 +39,26 @@ public class BungeeCronJob {
             t--;
 
             if (cal != null) {
-                if (t <= 0) {
-                    getTimer();
-
-                    if (!Objects.equals(clockTime, "") && !Utils.isTime(clockTime)) {
+                if (!Objects.equals(clockTime, "")) {
+                    if (!Utils.isTime(clockTime)) {
                         return;
                     }
+
+                    int nowMinuteKey = getNowMinuteKey();
+
+                    if (nowMinuteKey == lastClockRunMinuteKey) {
+                        return;
+                    }
+
+                    if (calDayMonth != 0 && cal.get(Calendar.DAY_OF_MONTH) == calDayMonth) {
+                        runCommands();
+                        lastClockRunMinuteKey = nowMinuteKey;
+                    } else if (calDayWeek != 0 && cal.get(Calendar.DAY_OF_WEEK) == calDayWeek) {
+                        runCommands();
+                        lastClockRunMinuteKey = nowMinuteKey;
+                    }
+                } else if (t <= 0) {
+                    getTimer();
 
                     if (calDayMonth != 0 && cal.get(Calendar.DAY_OF_MONTH) == calDayMonth) {
                         runCommands();
@@ -53,7 +68,21 @@ public class BungeeCronJob {
                 }
                 return;
             }
-            if (!Objects.equals(clockTime, "") && !Utils.isTime(clockTime)) {
+            if (!Objects.equals(clockTime, "")) {
+                if (!Utils.isTime(clockTime)) {
+                    return;
+                }
+
+                int nowMinuteKey = getNowMinuteKey();
+
+                if (nowMinuteKey == lastClockRunMinuteKey) {
+                    return;
+                }
+
+                runCommands();
+                lastClockRunMinuteKey = nowMinuteKey;
+                getTimer();
+
                 return;
             }
 
@@ -144,5 +173,10 @@ public class BungeeCronJob {
 
     public List<String> getCommands() {
         return cmds;
+    }
+
+    private int getNowMinuteKey() {
+        Calendar now = Calendar.getInstance();
+        return (now.get(Calendar.DAY_OF_YEAR) * 1440) + (now.get(Calendar.HOUR_OF_DAY) * 60) + now.get(Calendar.MINUTE);
     }
 }
