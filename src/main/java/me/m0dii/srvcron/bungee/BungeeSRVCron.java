@@ -105,12 +105,26 @@ public class BungeeSRVCron extends Plugin {
     public void loadJobs() {
         log("Loading cron jobs....");
 
-        for (String s : config.getSection("jobs").getKeys()) {
-            List<String> cmds = config.getStringList("jobs." + s + ".commands");
-            String time = config.getString("jobs." + s + ".time");
+        for (BungeeCronJob job : jobs.values()) {
+            job.stopJob();
+        }
 
-            jobs.put(s, new BungeeCronJob(this, cmds, time, s));
-            log("Created new job: " + s);
+        jobs.clear();
+        eventJobs.clear();
+        startUpCommands.clear();
+
+        Configuration jobsSection = config.getSection("jobs");
+
+        if (jobsSection != null) {
+            for (String s : jobsSection.getKeys()) {
+                List<String> cmds = config.getStringList("jobs." + s + ".commands");
+                String time = config.getString("jobs." + s + ".time");
+
+                jobs.put(s, new BungeeCronJob(this, cmds, time, s));
+                log("Created new job: " + s);
+            }
+        } else {
+            log("Configuration section with jobs was not found.");
         }
 
         log("Total loaded jobs: " + jobs.size());
@@ -127,22 +141,33 @@ public class BungeeSRVCron extends Plugin {
 
         log("All jobs started!");
 
-        for (String s : config.getSection("event-jobs").getKeys()) {
-            EventType type = EventType.isEventJob(s);
+        Configuration eventJobsSection = config.getSection("event-jobs");
 
-            if (type != null) {
-                List<BungeeEventJob> jobs = new ArrayList<>();
+        if (eventJobsSection != null) {
+            for (String s : eventJobsSection.getKeys()) {
+                EventType type = EventType.isEventJob(s);
 
-                for (String name : config.getSection("event-jobs." + s).getKeys()) {
-                    int time = config.getInt("event-jobs." + s + "." + name + ".time");
-                    List<String> cmds = config.getStringList("event-jobs." + s + "." + name + ".commands");
-                    jobs.add(new BungeeEventJob(this, name, time, cmds, type));
+                if (type != null) {
+                    List<BungeeEventJob> jobs = new ArrayList<>();
+                    Configuration jobsByType = config.getSection("event-jobs." + s);
 
-                    log("Created new event job: " + name + " (" + type.getConfigName() + ")");
+                    if (jobsByType != null) {
+                        for (String name : jobsByType.getKeys()) {
+                            int time = config.getInt("event-jobs." + s + "." + name + ".time");
+                            List<String> cmds = config.getStringList("event-jobs." + s + "." + name + ".commands");
+                            jobs.add(new BungeeEventJob(this, name, time, cmds, type));
+
+                            log("Created new event job: " + name + " (" + type.getConfigName() + ")");
+                        }
+
+                        eventJobs.put(type, jobs);
+                    } else {
+                        log("Configuration section for jobs in event job '" + s + "' was not found.");
+                    }
                 }
-
-                eventJobs.put(type, jobs);
             }
+        } else {
+            log("Configuration section with event-jobs was not found.");
         }
         log("All event jobs registered!");
 

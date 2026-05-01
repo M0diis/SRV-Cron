@@ -270,6 +270,8 @@ public class CronCommand implements CommandExecutor, TabCompleter {
 
         if (!srvCron.getJobs().containsKey(args[1])) {
             sendf(sender, langCfg.getJobDoesNotExist().replace("{job}", args[1]));
+
+            return;
         }
 
         CronJob j = srvCron.getJobs().get(args[1]);
