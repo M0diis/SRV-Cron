@@ -34,7 +34,19 @@ public class BungeeTimerCommand extends Command {
 
             c = new StringBuilder(c.substring(1));
 
-            int time = Integer.parseInt(args[0]);
+            final int time;
+
+            try {
+                time = Integer.parseInt(args[0]);
+            } catch (NumberFormatException ex) {
+                sender.sendMessage("§cTime must be a valid number!");
+                return;
+            }
+
+            if (time < 0) {
+                sender.sendMessage("§cTime cannot be negative!");
+                return;
+            }
 
             if (time > 6000) {
                 sender.sendMessage("§cMaximum timer delay is 60 minutes!");

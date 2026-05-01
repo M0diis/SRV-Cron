@@ -48,7 +48,13 @@ public class EventJob {
         }
 
         if (time == 0) {
-            Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(this, event, player, world, commands));
+            Runnable eventDispatchTask = () -> Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, event, player, world, commands));
+
+            if (Bukkit.isPrimaryThread()) {
+                eventDispatchTask.run();
+            } else {
+                Bukkit.getScheduler().runTask(SRVCron, eventDispatchTask);
+            }
         } else {
             new BukkitRunnable() {
                 @Override

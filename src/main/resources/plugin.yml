@@ -1,7 +1,7 @@
 name: SRV-Cron
 version: ${version}
 author: M0dii
-api-version: 1.13
+api-version: 1.21
 main: me.m0dii.srvcron.SRVCron
 softdepend: [PlaceholderAPI]
 commands:

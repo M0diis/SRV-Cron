@@ -34,7 +34,9 @@ Scheduler, jobs, events for your server. Schedule anything that your server need
 ### Development
 Building is really simple.
 
-To build SRV-Cron, you need JDK 8 or higher and Gradle installed on your system.
+To build SRV-Cron, you need JDK 21 and Gradle installed on your system.
+
+The Bukkit implementation targets Paper API `1.21.11-R0.1-SNAPSHOT`.
 
 ```
 git clone https://github.com/M0diis/SRV-Cron.git

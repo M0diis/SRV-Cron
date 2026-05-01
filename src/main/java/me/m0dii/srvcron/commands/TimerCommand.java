@@ -30,25 +30,44 @@ public class TimerCommand implements CommandExecutor {
             return true;
         }
 
-        if (args.length >= 2) {
-            StringBuilder c = new StringBuilder();
+        if (args.length == 1) {
+            sender.sendMessage("§cMissing command argument.");
+            sender.sendMessage("§aUsage: /timer <time> <command>");
 
-            for (int i = 1; i < args.length; i++) {
-                c.append(" ").append(args[i]);
-            }
-
-            c = new StringBuilder(c.substring(1));
-
-            int time = Integer.parseInt(args[0]);
-
-            if (time > 3600) {
-                sender.sendMessage("§cMaximum amount is 60 minutes!");
-
-                return true;
-            }
-
-            runCmd(c.toString(), time);
+            return true;
         }
+
+        StringBuilder c = new StringBuilder();
+
+        for (int i = 1; i < args.length; i++) {
+            c.append(" ").append(args[i]);
+        }
+
+        c = new StringBuilder(c.substring(1));
+
+        final int time;
+
+        try {
+            time = Integer.parseInt(args[0]);
+        } catch (NumberFormatException ex) {
+            sender.sendMessage("§cTime must be a valid number.");
+
+            return true;
+        }
+
+        if (time < 0) {
+            sender.sendMessage("§cTime cannot be negative.");
+
+            return true;
+        }
+
+        if (time > 3600) {
+            sender.sendMessage("§cMaximum amount is 60 minutes!");
+
+            return true;
+        }
+
+        runCmd(c.toString(), time);
 
         return true;
     }
