@@ -19,8 +19,8 @@ jobs:
         java-version: 21
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
-    - name: Build with Gradle
-      run: gradle shadowJar
+    - name: Build with Gradle Wrapper
+      run: ./gradlew --no-daemon shadowJar
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
