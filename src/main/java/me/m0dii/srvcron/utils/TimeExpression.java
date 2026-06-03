@@ -308,6 +308,15 @@ public final class TimeExpression {
         // every monday,friday at 18:30 / every wednesday at 00:00
         Matcher namedDays = Pattern.compile("^([a-z,]+)\\s+at\\s+([0-2]\\d:[0-5]\\d(?:,[0-2]\\d:[0-5]\\d)*)$", Pattern.CASE_INSENSITIVE).matcher(body);
         if (namedDays.find()) {
+            if ("day".equalsIgnoreCase(namedDays.group(1).trim())) {
+                List<LocalTime> parsedTimes = parseTimes(namedDays.group(2));
+                String normalized = "every day at " + formatTimes(parsedTimes);
+                return withOptions(source, normalized, zoneId, startDate, endDate, jitterSeconds,
+                        Kind.DAILY_TIMES, 0, null, null, null,
+                        Collections.emptySet(), Collections.emptySet(), Collections.emptySet(), parsedTimes,
+                        null, null, false, false, null, null);
+            }
+
             Set<Integer> days = parseDows(namedDays.group(1));
             List<LocalTime> parsedTimes = parseTimes(namedDays.group(2));
             String normalized = "every day of week in " + joinInts(days) + " at " + formatTimes(parsedTimes);
@@ -404,6 +413,11 @@ public final class TimeExpression {
 
         int stepSeconds = supportsSecondResolution() ? 1 : 60;
         int maxIterations = supportsSecondResolution() ? 2_000_000 : 1_000_000;
+
+        if (!supportsSecondResolution()) {
+            // Align to exact minute edges to avoid drifting when fromInclusive has non-zero seconds.
+            cursor = cursor.withSecond(0).withNano(0);
+        }
 
         for (int i = 0; i < maxIterations && out.size() < count; i++) {
             cursor = cursor.plusSeconds(stepSeconds);
