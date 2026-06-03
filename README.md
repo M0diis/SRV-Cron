@@ -80,7 +80,6 @@ time: cron: 0 0 * * 3
 Notes:
 - Cron format is `minute hour day-of-month month day-of-week`.
 - Day-of-week DSL numbers stay compatible with existing configs (`1=Sunday ... 7=Saturday`).
-- `schedule` and `checkschedule` are aliases.
 
 ### Development
 Building is really simple.
