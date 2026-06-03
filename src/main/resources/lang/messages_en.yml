@@ -14,6 +14,8 @@ usage:
   jobinfo: "&cUsage: /srvcron jobinfo <job-name>"
   joblist: "&cUsage: /srvcron list [events]"
   run: "&cUsage: /srvcron run <job-name> or /srvcron run event <event-name>"
+  checkschedule: "&cUsage: /srvcron checkschedule <job-name> [count]"
+  validate: "&cUsage: /srvcron validate <time-expression>"
   resume: "&cUsage: /srvcron resume <job-name>"
   suspend: "&cUsage: /srvcron suspend <job-name>"
   help: |-

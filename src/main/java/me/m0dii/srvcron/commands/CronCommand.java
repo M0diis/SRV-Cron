@@ -91,6 +91,8 @@ public class CronCommand implements CommandExecutor, TabCompleter {
             run(sender, args);
         } else if (args[0].equalsIgnoreCase("checkschedule")) {
             schedule(sender, args);
+        } else if (args[0].equalsIgnoreCase("validate")) {
+            validate(sender, args);
         }
     }
 
@@ -345,7 +347,8 @@ public class CronCommand implements CommandExecutor, TabCompleter {
         }
 
         if (args.length == 1) {
-            sendf(sender, "&7/srvcron schedule <job-name> [count]");
+            String usage = langCfg.getUsage("checkschedule");
+            sendf(sender, usage == null ? "&cUsage: /srvcron checkschedule <job-name> [count]" : usage);
 
             return;
         }
@@ -387,6 +390,40 @@ public class CronCommand implements CommandExecutor, TabCompleter {
         sendf(sender, "&8&m----------------------------------");
     }
 
+    private void validate(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("srvcron.command.schedule")) {
+            sendf(sender, langCfg.getNoPermissionCmd());
+
+            return;
+        }
+
+        if (args.length < 2) {
+            String usage = langCfg.getUsage("validate");
+            sendf(sender, usage == null ? "&cUsage: /srvcron validate <time-expression>" : usage);
+
+            return;
+        }
+
+        String expression = String.join(" ", java.util.Arrays.copyOfRange(args, 1, args.length));
+
+        sendf(sender, "&8&m----------------------------------");
+        sendf(sender, "&7VALIDATE TIME EXPRESSION");
+        sendf(sender, "&8Input: &7" + expression);
+        sendf(sender, "&8Interpretation: &7" + ScheduleCalculator.explain(expression));
+
+        java.util.List<String> next = ScheduleCalculator.getNextRuns(expression, 5);
+        if (!next.isEmpty()) {
+            sendf(sender, "&8Next runs:");
+            int idx = 1;
+            for (String run : next) {
+                sendf(sender, "&8#&7" + idx + ". &a" + run);
+                idx++;
+            }
+        }
+
+        sendf(sender, "&8&m----------------------------------");
+    }
+
     private void sendf(CommandSender sender, String msg) {
         String m = ChatColor.translateAlternateColorCodes('&', msg);
 
@@ -410,6 +447,7 @@ public class CronCommand implements CommandExecutor, TabCompleter {
             completes.add("resume");
             completes.add("suspend");
             completes.add("checkschedule");
+            completes.add("validate");
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("run")) {
@@ -459,6 +497,12 @@ public class CronCommand implements CommandExecutor, TabCompleter {
             completes.add("5");
             completes.add("10");
             completes.add("20");
+        }
+
+        if (args.length == 2 && args[0].equalsIgnoreCase("validate")) {
+            completes.add("every");
+            completes.add("at");
+            completes.add("cron:");
         }
 
         return completes;

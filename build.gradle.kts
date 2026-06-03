@@ -1,5 +1,3 @@
-import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.jvm.toolchain.JavaLanguageVersion
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
@@ -35,28 +33,15 @@ repositories {
     mavenLocal()
     mavenCentral()
 
-    maven {
-        url = uri("https://repo.papermc.io/repository/maven-public/")
-    }
-
-    maven {
-        url = uri("https://repo.extendedclip.com/content/repositories/placeholderapi/")
-    }
-
-    maven {
-        url = uri("https://repo.extendedclip.com/releases/")
-    }
-
-    maven {
-        url = uri("https://ci.ender.zone/plugin/repository/everything/")
-    }
-
-    maven {
-        url = uri("https://oss.sonatype.org/content/repositories/snapshots")
-    }
-
-    maven {
-        url = uri("https://oss.sonatype.org/content/repositories/central")
+    listOf(
+        "https://repo.papermc.io/repository/maven-public/",
+        "https://repo.extendedclip.com/content/repositories/placeholderapi/",
+        "https://repo.extendedclip.com/releases/",
+        "https://ci.ender.zone/plugin/repository/everything/",
+        "https://oss.sonatype.org/content/repositories/snapshots",
+        "https://oss.sonatype.org/content/repositories/central"
+    ).forEach { repoUrl ->
+        maven { url = uri(repoUrl) }
     }
 }
 

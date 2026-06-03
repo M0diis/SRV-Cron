@@ -1,181 +1,73 @@
 package me.m0dii.srvcron.bungee.job;
 
+import lombok.Getter;
 import me.m0dii.srvcron.bungee.BungeeSRVCron;
-import me.m0dii.srvcron.utils.Utils;
+import me.m0dii.srvcron.utils.TimeExpression;
 import net.md_5.bungee.api.scheduler.ScheduledTask;
 
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
 public class BungeeCronJob {
 
     private final BungeeSRVCron cron;
-    private final List<String> cmds;
+    @Getter
+    private final List<String> commands;
+    @Getter
     private final String time;
+    @Getter
     private final String name;
-    private Calendar cal;
-    private int t = 0;
-    private int calDayMonth = 0;
-    private int calDayWeek = 0;
-    private String clockTime = "";
-    private long lastClockRunMinuteKey = -1;
+    private TimeExpression schedule;
+    private long lastTickSecond = -1;
     private ScheduledTask task;
 
-    public BungeeCronJob(BungeeSRVCron cron, List<String> cmds, String time, String name) {
+    public BungeeCronJob(BungeeSRVCron cron, List<String> commands, String time, String name) {
         this.cron = cron;
-        this.cmds = cmds;
+        this.commands = commands;
         this.time = time;
         this.name = name;
     }
 
     public void startJob() throws IllegalArgumentException {
-        getTimer();
+        schedule = TimeExpression.parse(time);
 
         task = cron.getProxy().getScheduler().schedule(cron, () ->
         {
-            t--;
-
-            if (cal != null) {
-                if (!clockTime.isEmpty()) {
-                    if (!Utils.isTime(clockTime)) {
-                        return;
-                    }
-
-                    long nowMinuteKey = getNowMinuteKey();
-
-                    if (nowMinuteKey == lastClockRunMinuteKey) {
-                        return;
-                    }
-
-                    if (calDayMonth != 0 && cal.get(Calendar.DAY_OF_MONTH) == calDayMonth) {
-                        runCommands();
-                        lastClockRunMinuteKey = nowMinuteKey;
-                    } else if (calDayWeek != 0 && cal.get(Calendar.DAY_OF_WEEK) == calDayWeek) {
-                        runCommands();
-                        lastClockRunMinuteKey = nowMinuteKey;
-                    }
-                } else if (t <= 0) {
-                    getTimer();
-
-                    if (calDayMonth != 0 && cal.get(Calendar.DAY_OF_MONTH) == calDayMonth) {
-                        runCommands();
-                    } else if (calDayWeek != 0 && cal.get(Calendar.DAY_OF_WEEK) == calDayWeek) {
-                        runCommands();
-                    }
-                }
+            long epochSecond = Instant.now().getEpochSecond();
+            if (epochSecond == lastTickSecond) {
                 return;
             }
-            if (!clockTime.isEmpty()) {
-                if (!Utils.isTime(clockTime)) {
-                    return;
-                }
+            lastTickSecond = epochSecond;
 
-                long nowMinuteKey = getNowMinuteKey();
-
-                if (nowMinuteKey == lastClockRunMinuteKey) {
-                    return;
-                }
-
-                runCommands();
-                lastClockRunMinuteKey = nowMinuteKey;
-                getTimer();
-
+            if (!schedule.shouldRunAt(Instant.ofEpochSecond(epochSecond))) {
                 return;
             }
 
-            if (t <= 0) {
+            int jitterSeconds = schedule.jitterSeconds();
+            if (jitterSeconds <= 0) {
                 runCommands();
-                getTimer();
+                return;
             }
+
+            int delay = ThreadLocalRandom.current().nextInt(jitterSeconds + 1);
+            cron.getProxy().getScheduler().schedule(cron, this::runCommands, delay, TimeUnit.SECONDS);
         }, 0, 1, TimeUnit.SECONDS);
     }
 
     public void stopJob() {
-        if (task != null) task.cancel();
-    }
-
-    private void getTimer() throws IllegalArgumentException {
-        String[] args = time.split(" ");
-
-        if (args.length >= 5) {
-            if (args.length == 7) {
-                if (args[5].contains("at")) {
-                    clockTime = args[6];
-                }
-            }
-
-            cal = Calendar.getInstance();
-
-            if (args[2].contains("day") && args[4].contains("month")) {
-                calDayMonth = Integer.parseInt(args[1]);
-                t = clockTime.isEmpty() ? ((20 * 60) * 60) : 61;
-            } else if (args[2].contains("day") && args[4].contains("week")) {
-                calDayWeek = Integer.parseInt(args[1]) + 1;
-                t = clockTime.isEmpty() ? ((20 * 60) * 60) : 61;
-            } else {
-                throw new IllegalArgumentException("Invalid Time format: '" + time + "'");
-            }
-        } else if (args.length == 3) {
-            if (args[2].contains("second")) {
-                t = Integer.parseInt(args[1]);
-            } else if (args[2].contains("minute")) {
-                t = Integer.parseInt(args[1]) * 60;
-            } else if (args[2].contains("hour")) {
-                t = (Integer.parseInt(args[1]) * 60) * 60;
-            } else if (args[2].contains("day") || args[2].contains("days")) {
-                t = ((Integer.parseInt(args[1]) * 60) * 60) * 24;
-            } else {
-                throw new IllegalArgumentException("Invalid Time format: '" + time + "'");
-            }
-        } else if (args.length == 2 || time.startsWith("every day at")) {
-            String[] smArgs = time.replace("every day at", "at").split(" ");
-
-            if (smArgs[0].contains("at")) {
-                clockTime = smArgs[1];
-                t = 61;
-
-                return;
-            }
-
-            if (smArgs[1].contains("second")) {
-                t = 1;
-            } else if (smArgs[1].contains("minute")) {
-                t = 60;
-            } else if (smArgs[1].contains("hour")) {
-                t = 60 * 60;
-            } else if (smArgs[1].contains("day") || smArgs[1].contains("days")) {
-                t = (60 * 60) * 24;
-            } else {
-                throw new IllegalArgumentException("Invalid Time format: '" + time + "'");
-            }
-        } else {
-            throw new IllegalArgumentException("Invalid Time format: '" + time + "'");
+        if (task != null) {
+            task.cancel();
         }
     }
 
     public void runCommands() {
-        for (String s : new ArrayList<>(cmds)) {
+        for (String s : new ArrayList<>(commands)) {
             cron.getProxy().getPluginManager().dispatchCommand(
                     cron.getProxy().getConsole(), s);
         }
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getTime() {
-        return time;
-    }
-
-    public List<String> getCommands() {
-        return cmds;
-    }
-
-    private long getNowMinuteKey() {
-        return Instant.now().getEpochSecond() / 60;
-    }
 }
