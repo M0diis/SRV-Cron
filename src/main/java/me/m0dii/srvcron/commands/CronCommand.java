@@ -39,6 +39,12 @@ public class CronCommand implements CommandExecutor, TabCompleter {
                 sendf(sender, "&aVersion: &2" + srvCron.getDescription().getVersion());
                 sendf(sender, "&7/srvcron reload &8- &7reloads the config and jobs.");
                 sendf(sender, "&7/srvcron suspend &8- &7suspends job execution.");
+                sendf(sender, "&7/srvcron resume &8- &7resumes suspended jobs.");
+                sendf(sender, "&7/srvcron jobinfo &8- &7shows detailed info about a job.");
+                sendf(sender, "&7/srvcron list &8- &7lists all jobs.");
+                sendf(sender, "&7/srvcron run &8- &7manually run a job immediately.");
+                sendf(sender, "&7/srvcron checkschedule &8- &7check the next run times for a job.");
+                sendf(sender, "&7/srvcron validate &8- &7validate and explain a time expression.");
             } else {
                 helpMsg = helpMsg.replace("%version%", srvCron.getDescription().getVersion());
 
