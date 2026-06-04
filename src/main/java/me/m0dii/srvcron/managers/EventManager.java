@@ -32,15 +32,17 @@ public class EventManager implements Listener {
     public void onJoinEvent(PlayerJoinEvent event) {
         Player player = event.getPlayer();
 
-        if (ignore(EventType.JOIN_EVENT))
+        if (ignore(EventType.JOIN_EVENT)) {
             return;
+        }
 
-        for (EventJob job : srvCron.getEventJobs().get(EventType.JOIN_EVENT))
+        for (EventJob job : srvCron.getEventJobs().get(EventType.JOIN_EVENT)) {
             job.performJob(player, player.getWorld(), event);
+        }
     }
 
-    @EventHandler
-    public void onPlayerItemPickupEvent(final PlayerPickupItemEvent event) {
+    @EventHandler(ignoreCancelled = true)
+    public void onPlayerItemPickupEvent(final PlayerAttemptPickupItemEvent event) {
         if (ignore(EventType.ITEM_PICKUP_EVENT)) {
             return;
         }
@@ -68,8 +70,9 @@ public class EventManager implements Listener {
     public void onCommandEvent(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
 
-        if (ignore(EventType.COMMAND_EVENT))
+        if (ignore(EventType.COMMAND_EVENT)) {
             return;
+        }
 
         for (EventJob job : srvCron.getEventJobs().get(EventType.COMMAND_EVENT)) {
             List<String> commands = new ArrayList<>(job.getCommands());
@@ -88,8 +91,9 @@ public class EventManager implements Listener {
 
     @EventHandler
     public void onPlayerChatEvent(AsyncPlayerChatEvent event) {
-        if (ignore(EventType.CHAT_EVENT))
+        if (ignore(EventType.CHAT_EVENT)) {
             return;
+        }
 
         Player player = event.getPlayer();
 
@@ -110,8 +114,9 @@ public class EventManager implements Listener {
 
     @EventHandler
     public void onQuitEvent(PlayerQuitEvent event) {
-        if (ignore(EventType.QUIT_EVENT))
+        if (ignore(EventType.QUIT_EVENT)) {
             return;
+        }
 
         Player player = event.getPlayer();
 
@@ -136,26 +141,31 @@ public class EventManager implements Listener {
 
     @EventHandler
     public void onWeatherChangeEvent(WeatherChangeEvent event) {
-        if (ignore(EventType.WEATHER_CHANGE_EVENT))
+        if (ignore(EventType.WEATHER_CHANGE_EVENT)) {
             return;
+        }
 
-        for (EventJob job : srvCron.getEventJobs().get(EventType.WEATHER_CHANGE_EVENT))
+        for (EventJob job : srvCron.getEventJobs().get(EventType.WEATHER_CHANGE_EVENT)) {
             job.performJob(null, event.getWorld(), event);
+        }
     }
 
     @EventHandler
     public void onWorldLoadEvent(WorldLoadEvent event) {
-        if (ignore(EventType.WORLD_LOAD_EVENT))
+        if (ignore(EventType.WORLD_LOAD_EVENT)) {
             return;
+        }
 
-        for (EventJob job : srvCron.getEventJobs().get(EventType.WORLD_LOAD_EVENT))
+        for (EventJob job : srvCron.getEventJobs().get(EventType.WORLD_LOAD_EVENT)) {
             job.performJob(null, event.getWorld(), event);
+        }
     }
 
     @EventHandler
     public void onPlayerGamemodeChangeEvent(PlayerGameModeChangeEvent event) {
-        if (ignore(EventType.PLAYER_GAMEMODE_CHANGE_EVENT))
+        if (ignore(EventType.PLAYER_GAMEMODE_CHANGE_EVENT)) {
             return;
+        }
 
         Player player = event.getPlayer();
 
@@ -177,13 +187,15 @@ public class EventManager implements Listener {
 
     @EventHandler
     public void onPlayerBedEnterEvent(PlayerBedEnterEvent event) {
-        if (ignore(EventType.PLAYER_BED_ENTER_EVENT))
+        if (ignore(EventType.PLAYER_BED_ENTER_EVENT)) {
             return;
+        }
 
         Player player = event.getPlayer();
 
-        for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_BED_ENTER_EVENT))
+        for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_BED_ENTER_EVENT)) {
             job.performJob(player, player.getWorld(), event);
+        }
     }
 
     //    @EventHandler
@@ -214,19 +226,22 @@ public class EventManager implements Listener {
 //
     @EventHandler
     public void onPlayerBedLeaveEvent(PlayerBedLeaveEvent event) {
-        if (ignore(EventType.PLAYER_BED_LEAVE_EVENT))
+        if (ignore(EventType.PLAYER_BED_LEAVE_EVENT)) {
             return;
+        }
 
         Player player = event.getPlayer();
 
-        for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_BED_LEAVE_EVENT))
+        for (EventJob job : srvCron.getEventJobs().get(EventType.PLAYER_BED_LEAVE_EVENT)) {
             job.performJob(player, player.getWorld(), event);
+        }
     }
 
     @EventHandler
     public void onPlayerChangedWorldEvent(PlayerChangedWorldEvent event) {
-        if (ignore(EventType.PLAYER_CHANGE_WORLD_EVENT))
+        if (ignore(EventType.PLAYER_CHANGE_WORLD_EVENT)) {
             return;
+        }
 
         Player player = event.getPlayer();
 
@@ -248,8 +263,9 @@ public class EventManager implements Listener {
 
     @EventHandler
     public void onPlayerKickEvent(PlayerKickEvent event) {
-        if (ignore(EventType.PLAYER_KICK_EVENT))
+        if (ignore(EventType.PLAYER_KICK_EVENT)) {
             return;
+        }
 
         Player player = event.getPlayer();
 
@@ -353,8 +369,9 @@ public class EventManager implements Listener {
                 cmd = cmd.replace("<ALL>", "");
 
                 for (Player p : Bukkit.getOnlinePlayers()) {
-                    if (player != null && p.getUniqueId().equals(player.getUniqueId()))
+                    if (player != null && p.getUniqueId().equals(player.getUniqueId())) {
                         continue;
+                    }
 
                     Utils.sendCommand(p, cmd);
                 }

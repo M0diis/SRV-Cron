@@ -1,5 +1,6 @@
 package me.m0dii.srvcron.job;
 
+import lombok.Getter;
 import me.m0dii.srvcron.SRVCron;
 import me.m0dii.srvcron.managers.EventJobDispatchEvent;
 import me.m0dii.srvcron.utils.EventType;
@@ -12,17 +13,22 @@ import org.bukkit.scheduler.BukkitRunnable;
 import java.util.List;
 
 public class EventJob {
-    private final SRVCron SRVCron;
+    private final SRVCron srvCron;
+    @Getter
     private final String name;
     private final int time;
+    @Getter
     private final List<String> commands;
+    @Getter
     private final EventType eventType;
 
+    @Getter
     private boolean suspended = false;
+    @Getter
     private int runCount;
 
-    public EventJob(SRVCron SRVCron, String name, int time, List<String> commands, EventType eventType) {
-        this.SRVCron = SRVCron;
+    public EventJob(SRVCron srvCron, String name, int time, List<String> commands, EventType eventType) {
+        this.srvCron = srvCron;
         this.name = name;
         this.time = time;
         this.commands = commands;
@@ -42,7 +48,7 @@ public class EventJob {
             return;
 
         if (this.suspended) {
-            this.SRVCron.log("Job " + EventJob.this.name + " is suspended, skipping...");
+            this.srvCron.log("Job " + EventJob.this.name + " is suspended, skipping...");
 
             return;
         }
@@ -53,7 +59,7 @@ public class EventJob {
             if (Bukkit.isPrimaryThread()) {
                 eventDispatchTask.run();
             } else {
-                Bukkit.getScheduler().runTask(SRVCron, eventDispatchTask);
+                Bukkit.getScheduler().runTask(srvCron, eventDispatchTask);
             }
         } else {
             new BukkitRunnable() {
@@ -61,28 +67,12 @@ public class EventJob {
                 public void run() {
                     Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, event, player, world, commands));
                 }
-            }.runTaskLater(SRVCron, time * 20L);
+            }.runTaskLater(srvCron, time * 20L);
         }
     }
 
     public void performJob(Player player, World world, Event event) {
         performJob(player, world, event, commands);
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public EventType getEventType() {
-        return eventType;
-    }
-
-    public List<String> getCommands() {
-        return commands;
-    }
-
-    public int getRunCount() {
-        return runCount;
     }
 
     public void increaseRunCount() {
@@ -97,7 +87,4 @@ public class EventJob {
         suspended = false;
     }
 
-    public boolean isSuspended() {
-        return suspended;
-    }
 }

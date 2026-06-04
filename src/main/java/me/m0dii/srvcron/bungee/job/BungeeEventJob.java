@@ -1,5 +1,6 @@
 package me.m0dii.srvcron.bungee.job;
 
+import lombok.Getter;
 import me.m0dii.srvcron.bungee.BungeeSRVCron;
 import me.m0dii.srvcron.utils.EventType;
 import me.m0dii.srvcron.utils.Utils;
@@ -12,9 +13,11 @@ import java.util.concurrent.TimeUnit;
 public class BungeeEventJob {
 
     private final BungeeSRVCron cron;
+    @Getter
     private final String name;
     private final int time;
     private final List<String> commands;
+    @Getter
     private final EventType eventType;
 
     public BungeeEventJob(BungeeSRVCron cron, String name, int time, List<String> commands, EventType eventType) {
@@ -41,11 +44,4 @@ public class BungeeEventJob {
         }, time, TimeUnit.SECONDS);
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public EventType getEventType() {
-        return eventType;
-    }
 }

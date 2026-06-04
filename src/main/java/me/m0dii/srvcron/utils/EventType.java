@@ -1,5 +1,8 @@
 package me.m0dii.srvcron.utils;
 
+import lombok.Getter;
+
+@Getter
 public enum EventType {
     JOIN_EVENT("join-event"),
     QUIT_EVENT("quit-event"),
@@ -19,10 +22,6 @@ public enum EventType {
 
     EventType(String configName) {
         this.configName = configName;
-    }
-
-    public String getConfigName() {
-        return configName;
     }
 
     public static EventType isEventJob(String string) {

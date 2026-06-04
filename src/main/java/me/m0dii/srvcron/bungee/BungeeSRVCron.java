@@ -26,7 +26,7 @@ public class BungeeSRVCron extends Plugin {
     @Getter
     private final Map<String, BungeeCronJob> jobs = new HashMap<>();
     @Getter
-    private final Map<EventType, List<BungeeEventJob>> eventJobs = new HashMap<>();
+    private final Map<EventType, List<BungeeEventJob>> eventJobs = new EnumMap<>(EventType.class);
     @Getter
     private final List<String> startUpCommands = new ArrayList<>();
 
@@ -47,14 +47,14 @@ public class BungeeSRVCron extends Plugin {
 
             if (!this.file.exists()) {
                 log("Error: config.yml Not Found! Creating a new");
-                copy(this.file, "config.yml");
+                copyConfig(this.file);
             }
 
             config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(this.file);
 
             ConfigurationProvider.getProvider(YamlConfiguration.class).save(config, this.file);
         } catch (IOException e) {
-            e.printStackTrace();
+            getLogger().severe("Failed to load config.yml! " + e.getMessage());
         }
 
         log("Loading commands...");
@@ -173,11 +173,9 @@ public class BungeeSRVCron extends Plugin {
 
         List<String> cmds = config.getStringList("startup.commands");
 
-        if (cmds != null) {
-            for (String command : cmds) {
-                startUpCommands.add(command);
-                log("Created new startup command: " + command);
-            }
+        for (String command : cmds) {
+            startUpCommands.add(command);
+            log("Created new startup command: " + command);
         }
 
         log("All startup commands registered!");
@@ -213,17 +211,15 @@ public class BungeeSRVCron extends Plugin {
             pw.flush();
             pw.close();
         } catch (IOException ex) {
-            ex.printStackTrace();
+            getLogger().severe("Failed to log to file! " + ex.getMessage());
         }
     }
 
-    private void copy(File file, String resource) {
+    private void copyConfig(File file) {
         try {
-            Files.copy(getResourceAsStream(resource), file.toPath());
+            Files.copy(getResourceAsStream("config.yml"), file.toPath());
         } catch (IOException ex) {
-            ex.printStackTrace();
-
-            getLogger().warning("Could not copy " + resource + " file");
+            getLogger().severe("Could not copy " + "config.yml" + " file");
         }
     }
 
@@ -231,7 +227,7 @@ public class BungeeSRVCron extends Plugin {
         try {
             ConfigurationProvider.getProvider(YamlConfiguration.class).save(config, file);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            getLogger().severe("Failed to save config.yml! " + ex.getMessage());
         }
     }
 
@@ -239,7 +235,7 @@ public class BungeeSRVCron extends Plugin {
         try {
             config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(this.file);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            getLogger().severe("Failed to reload config.yml! " + ex.getMessage());
         }
     }
 }

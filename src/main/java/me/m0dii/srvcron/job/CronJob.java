@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class CronJob {
-    private final SRVCron SRVCron;
+    private final SRVCron srvCron;
     @Getter
     private final List<String> commands;
     @Getter
@@ -31,7 +31,7 @@ public class CronJob {
     private int runCount = 0;
 
     public CronJob(SRVCron srvCronPlugin, List<String> commands, String time, String name) {
-        this.SRVCron = srvCronPlugin;
+        this.srvCron = srvCronPlugin;
         this.commands = commands;
         this.time = time;
         this.name = name;
@@ -60,7 +60,7 @@ public class CronJob {
                 }
 
                 int delay = ThreadLocalRandom.current().nextInt(jitterSeconds + 1);
-                Bukkit.getScheduler().runTaskLater(SRVCron, this::safeRunCommands, delay * 20L);
+                Bukkit.getScheduler().runTaskLater(srvCron, this::safeRunCommands, delay * 20L);
             }
 
             private void safeRunCommands() {
@@ -68,7 +68,7 @@ public class CronJob {
                     runCommands();
                 }
             }
-        }.runTaskTimer(SRVCron, 0, 20);
+        }.runTaskTimer(srvCron, 0, 20);
     }
 
     public void stopJob() {

@@ -339,36 +339,15 @@ public class Utils {
 
                 debug("Checking condition after parse: " + leftStr + " " + op + " " + rightStr);
 
-                switch (op) {
-                    case ">":
-                    case "greater_than":
-                        return left > right;
-                    case "<":
-                    case "less_than":
-                        return left < right;
-
-                    case "<=":
-                    case "less_than_or_equals":
-                    case "less_or_equals":
-                        return left <= right;
-
-                    case ">=":
-                    case "greater_or_equals":
-                    case "greater_than_or_equals":
-                        return left >= right;
-
-                    case "!=":
-                    case "not_equals":
-                        return left != right;
-
-                    case "==":
-                    case "=":
-                    case "equals":
-                        return left == right;
-
-                    default:
-                        return false;
-                }
+                return switch (op) {
+                    case ">", "greater_than" -> left > right;
+                    case "<", "less_than" -> left < right;
+                    case "<=", "less_than_or_equals", "less_or_equals" -> left <= right;
+                    case ">=", "greater_or_equals", "greater_than_or_equals" -> left >= right;
+                    case "!=", "not_equals" -> left != right;
+                    case "==", "=", "equals" -> left == right;
+                    default -> false;
+                };
             } catch (NumberFormatException ex) {
                 SRVCron plugin = plugin();
 

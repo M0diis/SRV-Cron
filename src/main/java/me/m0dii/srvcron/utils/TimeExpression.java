@@ -1,25 +1,10 @@
 package me.m0dii.srvcron.utils;
 
-import java.time.DayOfWeek;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.Month;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -751,18 +736,12 @@ public final class TimeExpression {
     }
 
     private static String unitName(IntervalUnit unit, int value) {
-        switch (unit) {
-            case SECOND:
-                return value == 1 ? "second" : "seconds";
-            case MINUTE:
-                return value == 1 ? "minute" : "minutes";
-            case HOUR:
-                return value == 1 ? "hour" : "hours";
-            case DAY:
-                return value == 1 ? "day" : "days";
-            default:
-                return "units";
-        }
+        return switch (unit) {
+            case SECOND -> value == 1 ? "second" : "seconds";
+            case MINUTE -> value == 1 ? "minute" : "minutes";
+            case HOUR -> value == 1 ? "hour" : "hours";
+            case DAY -> value == 1 ? "day" : "days";
+        };
     }
 
     private static DayOfWeek parseWeekdayName(String token) {
@@ -771,45 +750,29 @@ public final class TimeExpression {
     }
 
     private static DayOfWeek dslToDayOfWeek(int dsl) {
-        switch (dsl) {
-            case 1:
-                return DayOfWeek.SUNDAY;
-            case 2:
-                return DayOfWeek.MONDAY;
-            case 3:
-                return DayOfWeek.TUESDAY;
-            case 4:
-                return DayOfWeek.WEDNESDAY;
-            case 5:
-                return DayOfWeek.THURSDAY;
-            case 6:
-                return DayOfWeek.FRIDAY;
-            case 7:
-                return DayOfWeek.SATURDAY;
-            default:
-                throw new IllegalArgumentException("Invalid DSL weekday: " + dsl);
-        }
+        return switch (dsl) {
+            case 1 -> DayOfWeek.SUNDAY;
+            case 2 -> DayOfWeek.MONDAY;
+            case 3 -> DayOfWeek.TUESDAY;
+            case 4 -> DayOfWeek.WEDNESDAY;
+            case 5 -> DayOfWeek.THURSDAY;
+            case 6 -> DayOfWeek.FRIDAY;
+            case 7 -> DayOfWeek.SATURDAY;
+            default -> throw new IllegalArgumentException("Invalid DSL weekday: " + dsl);
+        };
     }
 
     private static int dayOfWeekToDsl(DayOfWeek day) {
-        switch (day) {
-            case SUNDAY:
-                return 1;
-            case MONDAY:
-                return 2;
-            case TUESDAY:
-                return 3;
-            case WEDNESDAY:
-                return 4;
-            case THURSDAY:
-                return 5;
-            case FRIDAY:
-                return 6;
-            case SATURDAY:
-                return 7;
-            default:
-                return 0;
-        }
+        return switch (day) {
+            case SUNDAY -> 1;
+            case MONDAY -> 2;
+            case TUESDAY -> 3;
+            case WEDNESDAY -> 4;
+            case THURSDAY -> 5;
+            case FRIDAY -> 6;
+            case SATURDAY -> 7;
+            default -> 0;
+        };
     }
 
     private static void validateRange(int value, int min, int max, String label) {
@@ -822,16 +785,12 @@ public final class TimeExpression {
         if (n % 100 >= 11 && n % 100 <= 13) {
             return "th";
         }
-        switch (n % 10) {
-            case 1:
-                return "st";
-            case 2:
-                return "nd";
-            case 3:
-                return "rd";
-            default:
-                return "th";
-        }
+        return switch (n % 10) {
+            case 1 -> "st";
+            case 2 -> "nd";
+            case 3 -> "rd";
+            default -> "th";
+        };
     }
 
     private static Map<String, Integer> buildWeekdayMap() {
@@ -865,22 +824,14 @@ public final class TimeExpression {
         return out;
     }
 
-    private static final class CronMatcher {
-        private final String raw;
-        private final IntMatcher minute;
-        private final IntMatcher hour;
-        private final IntMatcher dayOfMonth;
-        private final IntMatcher month;
-        private final IntMatcher dayOfWeek;
-
-        private CronMatcher(String raw, IntMatcher minute, IntMatcher hour, IntMatcher dayOfMonth, IntMatcher month, IntMatcher dayOfWeek) {
-            this.raw = raw;
-            this.minute = minute;
-            this.hour = hour;
-            this.dayOfMonth = dayOfMonth;
-            this.month = month;
-            this.dayOfWeek = dayOfWeek;
-        }
+    private record CronMatcher(
+            String raw,
+            IntMatcher minute,
+            IntMatcher hour,
+            IntMatcher dayOfMonth,
+            IntMatcher month,
+            IntMatcher dayOfWeek
+    ) {
 
         static CronMatcher parse(String expr) {
             String[] split = expr.trim().split("\\s+");
@@ -904,10 +855,6 @@ public final class TimeExpression {
                     && dayOfMonth.matches(now.getDayOfMonth())
                     && month.matches(now.getMonthValue())
                     && dayOfWeek.matches(dow);
-        }
-
-        String raw() {
-            return raw;
         }
 
         private static final Map<String, Integer> MONTHS_TO_INT = new HashMap<>();
@@ -937,12 +884,7 @@ public final class TimeExpression {
         }
     }
 
-    private static final class IntMatcher {
-        private final Set<Integer> allowed;
-
-        private IntMatcher(Set<Integer> allowed) {
-            this.allowed = allowed;
-        }
+    private record IntMatcher(Set<Integer> allowed) {
 
         static IntMatcher parse(String expr, int min, int max, Map<String, Integer> aliases) {
             Set<Integer> values = new HashSet<>();

@@ -1,5 +1,6 @@
 package me.m0dii.srvcron.managers;
 
+import lombok.Getter;
 import me.m0dii.srvcron.job.EventJob;
 import me.m0dii.srvcron.utils.EventType;
 import org.bukkit.World;
@@ -13,9 +14,13 @@ import java.util.List;
 public class EventJobDispatchEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS_LIST = new HandlerList();
 
+    @Getter
     private final EventJob eventJob;
+    @Getter
     private final Event event;
+    @Getter
     private final Player player;
+    @Getter
     private final World world;
 
     private List<String> jobCommands;
@@ -40,10 +45,6 @@ public class EventJobDispatchEvent extends Event implements Cancellable {
         this.world = world;
 
         this.jobCommands = commands;
-    }
-
-    public EventJob getEventJob() {
-        return eventJob;
     }
 
     @Override
@@ -73,18 +74,6 @@ public class EventJobDispatchEvent extends Event implements Cancellable {
 
     public List<String> getFinalCommands() {
         return jobCommands;
-    }
-
-    public Player getPlayer() {
-        return player;
-    }
-
-    public World getWorld() {
-        return world;
-    }
-
-    public Event getEvent() {
-        return event;
     }
 
     @Override

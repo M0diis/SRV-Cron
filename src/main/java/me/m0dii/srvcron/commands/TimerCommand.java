@@ -7,17 +7,18 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jspecify.annotations.NonNull;
 
 public class TimerCommand implements CommandExecutor {
-    private final SRVCron SRVCron;
+    private final SRVCron srvCron;
 
-    public TimerCommand(SRVCron SRVCron) {
-        this.SRVCron = SRVCron;
+    public TimerCommand(SRVCron srvCron) {
+        this.srvCron = srvCron;
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd,
-                             String label, String[] args) {
+    public boolean onCommand(CommandSender sender, @NonNull Command cmd,
+                             @NonNull String label, String @NonNull [] args) {
         if (!sender.hasPermission("srvcron.command.timer")) {
             sender.sendMessage("§cYou do not have permission to execute this command.");
 
@@ -78,6 +79,6 @@ public class TimerCommand implements CommandExecutor {
             public void run() {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd));
             }
-        }.runTaskLater(SRVCron, seconds * 20L);
+        }.runTaskLater(srvCron, seconds * 20L);
     }
 }
