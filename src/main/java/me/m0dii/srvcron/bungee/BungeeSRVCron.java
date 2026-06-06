@@ -7,6 +7,7 @@ import me.m0dii.srvcron.bungee.job.BungeeCronJob;
 import me.m0dii.srvcron.bungee.job.BungeeEventJob;
 import me.m0dii.srvcron.bungee.managers.EventManager;
 import me.m0dii.srvcron.utils.EventType;
+import me.m0dii.srvcron.utils.TimeExpression;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
@@ -51,6 +52,7 @@ public class BungeeSRVCron extends Plugin {
             }
 
             config = ConfigurationProvider.getProvider(YamlConfiguration.class).load(this.file);
+            applyScheduleSettings();
 
             ConfigurationProvider.getProvider(YamlConfiguration.class).save(config, this.file);
         } catch (IOException e) {
@@ -103,6 +105,7 @@ public class BungeeSRVCron extends Plugin {
     }
 
     public void loadJobs() {
+        applyScheduleSettings();
         log("Loading cron jobs....");
 
         for (BungeeCronJob job : jobs.values()) {
@@ -179,6 +182,14 @@ public class BungeeSRVCron extends Plugin {
         }
 
         log("All startup commands registered!");
+    }
+
+    private void applyScheduleSettings() {
+        String configured = config.getString("schedule.weekday-numbering", "monday-first");
+        boolean valid = TimeExpression.configureWeekdayNumbering(configured);
+        if (!valid) {
+            log("Invalid value for schedule.weekday-numbering: '" + configured + "'. Falling back to 'monday-first'.");
+        }
     }
 
     @Override

@@ -46,13 +46,21 @@ time: every monday,friday at 18:30
 
 # list/range support
 time: every day of week in 1,3,5 at 12:00
+time: every day of week in 2..6 at 07:45
 time: every day of month in 1..5 at 09:00
+
+# plain intervals
+time: every 30 seconds
+time: every 5 minutes
+time: every 1 hour
+time: every 2 days
 
 # multiple times per day
 time: every day at 08:00,12:00,18:00
 
 # time windows
 time: every 15 minutes from 09:00 to 17:00
+time: every 20 minutes from 23:00 to 03:00
 
 # nth / last weekday in month
 time: every 2nd monday of month at 10:00
@@ -63,28 +71,41 @@ time: every weekday at 09:00
 time: every weekend at 11:00
 time: every month on last-day at 23:55
 
+# month-name schedules
+time: every january,march day 1 at 08:00
+
 # start/end constraints
 time: every 1 hour between 2026-06-01 and 2026-09-01
 
 # per-job timezone and jitter
+# options order is: ... [between ...] [jitter ...] [timezone ...]
 time: every day at 09:00 timezone Europe/Berlin
 time: every 5 minutes jitter 30s
+time: every 10 minutes jitter 2m timezone Europe/Berlin
 
 # one-shot execution
 time: at 2026-06-10 14:30
 
 # classic cron expression (opt-in)
 time: cron: 0 0 * * 3
+time: cron: */15 9-17 * * mon-fri
 ```
 
 Notes:
 - Cron format is `minute hour day-of-month month day-of-week`.
-- Day-of-week DSL numbers stay compatible with existing configs (`1=Sunday ... 7=Saturday`).
+- Cron supports `*`, lists (`,`), ranges (`-`), and steps (`/`) in each field.
+- Cron month/day-of-week names are supported (e.g. `jan`, `mon-fri`).
+- Numeric DSL weekdays are configurable via `schedule.weekday-numbering` in `config.yml`.
+- Default numbering is `monday-first` (`1=Monday ... 7=Sunday`); `sunday-first` keeps legacy behavior.
+- If `schedule.weekday-numbering` is malformed, SRV-Cron falls back to `monday-first` and logs a warning.
+- Legacy expressions are still accepted for backward compatibility:
+  - `every 4 day of week at 00:00` (or without `at`, defaults to `00:00`)
+  - `every 1 day of month at 09:00` (or without `at`, defaults to `00:00`)
 
 ### Development
 Building is really simple.
 
-To build SRV-Cron, you need JDK 21 and Gradle installed on your system.
+To build SRV-Cron, you need JDK 21 and Gradle instayylled on your system.
 
 The Bukkit implementation targets Paper API `1.21.11-R0.1-SNAPSHOT`.
 

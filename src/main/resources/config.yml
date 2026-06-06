@@ -89,6 +89,11 @@ startup:
     - save-all
     - '[LOG <server_startup.log>] Server has been started.'
 
+schedule:
+  # Controls numeric weekdays in expressions like: every day of week in 1,5 at 12:00
+  # Supported: monday-first (default, ISO), sunday-first (legacy), iso, legacy
+  weekday-numbering: monday-first
+
 debug: false
 silent-start: false
 notify-update: true

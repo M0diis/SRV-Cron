@@ -16,8 +16,15 @@ public final class TimeExpression {
     private static final Pattern TIMEZONE = Pattern.compile("\\s+timezone\\s+([A-Za-z_]+/[A-Za-z_]+)\\s*$", Pattern.CASE_INSENSITIVE);
     private static final Pattern JITTER = Pattern.compile("\\s+jitter\\s+(\\d+)(s|m)\\s*$", Pattern.CASE_INSENSITIVE);
 
-    private static final Map<String, Integer> WEEKDAY_TO_DSL = buildWeekdayMap();
+    private static final Map<String, DayOfWeek> DAY_NAME_TO_WEEKDAY = buildWeekdayMap();
     private static final Map<String, Month> MONTHS = buildMonthMap();
+
+    private enum WeekdayNumbering {
+        MONDAY_FIRST,
+        SUNDAY_FIRST
+    }
+
+    private static volatile WeekdayNumbering weekdayNumbering = WeekdayNumbering.MONDAY_FIRST;
 
     private final String source;
     private final String normalized;
@@ -352,6 +359,31 @@ public final class TimeExpression {
         throw new IllegalArgumentException("Unsupported time syntax: '" + source + "'");
     }
 
+    /**
+     * Configures numeric day-of-week interpretation for DSL expressions.
+     * Returns false when the provided value is invalid and Monday-first fallback is used.
+     */
+    public static boolean configureWeekdayNumbering(String configuredValue) {
+        if (configuredValue == null) {
+            weekdayNumbering = WeekdayNumbering.MONDAY_FIRST;
+            return false;
+        }
+
+        String normalized = configuredValue.trim().toLowerCase(Locale.ROOT).replace('_', '-');
+        if (normalized.equals("monday-first") || normalized.equals("monday")
+                || normalized.equals("iso") || normalized.equals("iso-8601")) {
+            weekdayNumbering = WeekdayNumbering.MONDAY_FIRST;
+            return true;
+        }
+        if (normalized.equals("sunday-first") || normalized.equals("sunday") || normalized.equals("legacy")) {
+            weekdayNumbering = WeekdayNumbering.SUNDAY_FIRST;
+            return true;
+        }
+
+        weekdayNumbering = WeekdayNumbering.MONDAY_FIRST;
+        return false;
+    }
+
     public String source() {
         return source;
     }
@@ -608,15 +640,21 @@ public final class TimeExpression {
     private static int parseDowSingle(String token) {
         if (token.matches("\\d+")) {
             int val = Integer.parseInt(token);
-            validateRange(val, 1, 7, "week day");
+            if (val < 1 || val > 7) {
+                throw new IllegalArgumentException("week day out of range: " + val + " (expected 1-7, mode " + weekdayNumberingLabel() + ")");
+            }
             return val;
         }
 
-        Integer mapped = WEEKDAY_TO_DSL.get(token);
-        if (mapped == null) {
+        DayOfWeek dayOfWeek = DAY_NAME_TO_WEEKDAY.get(token);
+        if (dayOfWeek == null) {
             throw new IllegalArgumentException("Unknown weekday: " + token);
         }
-        return mapped;
+        return dayOfWeekToDsl(dayOfWeek);
+    }
+
+    private static String weekdayNumberingLabel() {
+        return weekdayNumbering == WeekdayNumbering.SUNDAY_FIRST ? "sunday-first" : "monday-first";
     }
 
     private static Set<Integer> parseMonthDays(String input) {
@@ -745,32 +783,61 @@ public final class TimeExpression {
     }
 
     private static DayOfWeek parseWeekdayName(String token) {
-        int dsl = parseDowSingle(token.toLowerCase(Locale.ROOT));
-        return dslToDayOfWeek(dsl);
+        DayOfWeek dayOfWeek = DAY_NAME_TO_WEEKDAY.get(token.toLowerCase(Locale.ROOT));
+        if (dayOfWeek == null) {
+            throw new IllegalArgumentException("Unknown weekday: " + token);
+        }
+        return dayOfWeek;
     }
 
     private static DayOfWeek dslToDayOfWeek(int dsl) {
+        if (weekdayNumbering == WeekdayNumbering.SUNDAY_FIRST) {
+            return switch (dsl) {
+                case 1 -> DayOfWeek.SUNDAY;
+                case 2 -> DayOfWeek.MONDAY;
+                case 3 -> DayOfWeek.TUESDAY;
+                case 4 -> DayOfWeek.WEDNESDAY;
+                case 5 -> DayOfWeek.THURSDAY;
+                case 6 -> DayOfWeek.FRIDAY;
+                case 7 -> DayOfWeek.SATURDAY;
+                default -> throw new IllegalArgumentException("Invalid DSL weekday: " + dsl);
+            };
+        }
+
         return switch (dsl) {
-            case 1 -> DayOfWeek.SUNDAY;
-            case 2 -> DayOfWeek.MONDAY;
-            case 3 -> DayOfWeek.TUESDAY;
-            case 4 -> DayOfWeek.WEDNESDAY;
-            case 5 -> DayOfWeek.THURSDAY;
-            case 6 -> DayOfWeek.FRIDAY;
-            case 7 -> DayOfWeek.SATURDAY;
+            case 1 -> DayOfWeek.MONDAY;
+            case 2 -> DayOfWeek.TUESDAY;
+            case 3 -> DayOfWeek.WEDNESDAY;
+            case 4 -> DayOfWeek.THURSDAY;
+            case 5 -> DayOfWeek.FRIDAY;
+            case 6 -> DayOfWeek.SATURDAY;
+            case 7 -> DayOfWeek.SUNDAY;
             default -> throw new IllegalArgumentException("Invalid DSL weekday: " + dsl);
         };
     }
 
     private static int dayOfWeekToDsl(DayOfWeek day) {
+        if (weekdayNumbering == WeekdayNumbering.SUNDAY_FIRST) {
+            return switch (day) {
+                case SUNDAY -> 1;
+                case MONDAY -> 2;
+                case TUESDAY -> 3;
+                case WEDNESDAY -> 4;
+                case THURSDAY -> 5;
+                case FRIDAY -> 6;
+                case SATURDAY -> 7;
+                default -> 0;
+            };
+        }
+
         return switch (day) {
-            case SUNDAY -> 1;
-            case MONDAY -> 2;
-            case TUESDAY -> 3;
-            case WEDNESDAY -> 4;
-            case THURSDAY -> 5;
-            case FRIDAY -> 6;
-            case SATURDAY -> 7;
+            case MONDAY -> 1;
+            case TUESDAY -> 2;
+            case WEDNESDAY -> 3;
+            case THURSDAY -> 4;
+            case FRIDAY -> 5;
+            case SATURDAY -> 6;
+            case SUNDAY -> 7;
             default -> 0;
         };
     }
@@ -793,25 +860,25 @@ public final class TimeExpression {
         };
     }
 
-    private static Map<String, Integer> buildWeekdayMap() {
-        Map<String, Integer> out = new HashMap<>();
-        out.put("sun", 1);
-        out.put("sunday", 1);
-        out.put("mon", 2);
-        out.put("monday", 2);
-        out.put("tue", 3);
-        out.put("tues", 3);
-        out.put("tuesday", 3);
-        out.put("wed", 4);
-        out.put("wednesday", 4);
-        out.put("thu", 5);
-        out.put("thur", 5);
-        out.put("thurs", 5);
-        out.put("thursday", 5);
-        out.put("fri", 6);
-        out.put("friday", 6);
-        out.put("sat", 7);
-        out.put("saturday", 7);
+    private static Map<String, DayOfWeek> buildWeekdayMap() {
+        Map<String, DayOfWeek> out = new HashMap<>();
+        out.put("mon", DayOfWeek.MONDAY);
+        out.put("monday", DayOfWeek.MONDAY);
+        out.put("tue", DayOfWeek.TUESDAY);
+        out.put("tues", DayOfWeek.TUESDAY);
+        out.put("tuesday", DayOfWeek.TUESDAY);
+        out.put("wed", DayOfWeek.WEDNESDAY);
+        out.put("wednesday", DayOfWeek.WEDNESDAY);
+        out.put("thu", DayOfWeek.THURSDAY);
+        out.put("thur", DayOfWeek.THURSDAY);
+        out.put("thurs", DayOfWeek.THURSDAY);
+        out.put("thursday", DayOfWeek.THURSDAY);
+        out.put("fri", DayOfWeek.FRIDAY);
+        out.put("friday", DayOfWeek.FRIDAY);
+        out.put("sat", DayOfWeek.SATURDAY);
+        out.put("saturday", DayOfWeek.SATURDAY);
+        out.put("sun", DayOfWeek.SUNDAY);
+        out.put("sunday", DayOfWeek.SUNDAY);
         return out;
     }
 

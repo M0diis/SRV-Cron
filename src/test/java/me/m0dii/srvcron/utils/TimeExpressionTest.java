@@ -1,6 +1,7 @@
 package me.m0dii.srvcron.utils;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -20,6 +21,11 @@ class TimeExpressionTest {
 
     private static void assertSameInstant(ZonedDateTime expected, ZonedDateTime actual) {
         assertEquals(expected.toInstant(), actual.toInstant());
+    }
+
+    @AfterEach
+    void resetWeekdayNumbering() {
+        TimeExpression.configureWeekdayNumbering("monday-first");
     }
 
     @Test
@@ -44,6 +50,39 @@ class TimeExpressionTest {
         assertSameInstant(zdt(2026, 6, 1, 18, 30), next.get(0));
         assertSameInstant(zdt(2026, 6, 5, 18, 30), next.get(1));
         assertSameInstant(zdt(2026, 6, 8, 18, 30), next.get(2));
+    }
+
+    @Test
+    void defaultsToMondayFirstForNumericWeekdays() {
+        TimeExpression.configureWeekdayNumbering("monday-first");
+        TimeExpression expression = TimeExpression.parse("every day of week in 5 at 02:50 timezone Etc/UTC");
+
+        Instant from = zdt(2026, 6, 6, 0, 0).toInstant(); // Saturday
+        List<ZonedDateTime> next = expression.nextRuns(1, from);
+
+        assertSameInstant(zdt(2026, 6, 12, 2, 50), next.get(0)); // Friday
+    }
+
+    @Test
+    void supportsLegacySundayFirstWhenConfigured() {
+        assertTrue(TimeExpression.configureWeekdayNumbering("sunday-first"));
+        TimeExpression expression = TimeExpression.parse("every day of week in 5 at 02:50 timezone Etc/UTC");
+
+        Instant from = zdt(2026, 6, 3, 0, 0).toInstant();
+        List<ZonedDateTime> next = expression.nextRuns(1, from);
+
+        assertSameInstant(zdt(2026, 6, 4, 2, 50), next.get(0)); // Thursday in legacy mode
+    }
+
+    @Test
+    void fallsBackToMondayFirstWhenWeekdayNumberingConfigIsMalformed() {
+        assertFalse(TimeExpression.configureWeekdayNumbering("broken-value"));
+        TimeExpression expression = TimeExpression.parse("every day of week in 5 at 02:50 timezone Etc/UTC");
+
+        Instant from = zdt(2026, 6, 6, 0, 0).toInstant();
+        List<ZonedDateTime> next = expression.nextRuns(1, from);
+
+        assertSameInstant(zdt(2026, 6, 12, 2, 50), next.get(0));
     }
 
     @Test

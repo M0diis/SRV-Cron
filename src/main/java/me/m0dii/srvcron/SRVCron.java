@@ -9,6 +9,7 @@ import me.m0dii.srvcron.managers.EventManager;
 import me.m0dii.srvcron.managers.StartupCommandDispatchEvent;
 import me.m0dii.srvcron.utils.EventType;
 import me.m0dii.srvcron.utils.LangConfig;
+import me.m0dii.srvcron.utils.TimeExpression;
 import me.m0dii.srvcron.utils.UpdateChecker;
 import me.m0dii.srvcron.utils.Utils;
 import org.bstats.bukkit.Metrics;
@@ -50,6 +51,7 @@ public class SRVCron extends JavaPlugin {
         saveConfig();
 
         this.langCfg = new LangConfig(this, getConfig().getString("locale"));
+        applyScheduleSettings();
 
         log("Finished loading configuration.");
 
@@ -124,6 +126,7 @@ public class SRVCron extends JavaPlugin {
     }
 
     public void loadJobs() {
+        applyScheduleSettings();
         logStartup("Loading cron jobs....");
 
         for (CronJob job : jobs.values()) {
@@ -208,6 +211,14 @@ public class SRVCron extends JavaPlugin {
             }
 
             logStartup("Startup commands have been registered.");
+        }
+    }
+
+    private void applyScheduleSettings() {
+        String configured = getConfig().getString("schedule.weekday-numbering", "monday-first");
+        boolean valid = TimeExpression.configureWeekdayNumbering(configured);
+        if (!valid) {
+            log("Invalid value for schedule.weekday-numbering: '" + configured + "'. Falling back to 'monday-first'.");
         }
     }
 
