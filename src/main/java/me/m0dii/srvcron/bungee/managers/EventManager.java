@@ -23,8 +23,9 @@ public class EventManager implements Listener {
     public void onJoinEvent(final ServerConnectEvent event) {
         ProxiedPlayer player = event.getPlayer();
 
-        if (!cron.getEventJobs().containsKey(EventType.JOIN_EVENT))
+        if (!cron.getEventJobs().containsKey(EventType.JOIN_EVENT)) {
             return;
+        }
 
         for (BungeeEventJob job : cron.getEventJobs().get(EventType.JOIN_EVENT))
             job.performJob(player);

@@ -153,16 +153,18 @@ public class Utils {
             if (sendAs.contains("(") && sendAs.contains(")")) {
                 String cond = sendAs.substring(sendAs.indexOf("(") + 1, sendAs.indexOf(")"));
 
-                if (onlinePlayer != null)
+                if (onlinePlayer != null) {
                     debug("Checking condition '" + cond + "' for player " + onlinePlayer.getName());
-                else
+                } else {
                     debug("Checking condition '" + cond + "' without player");
+                }
 
                 if (!matchesFilter(onlinePlayer, cond)) {
-                    if (onlinePlayer != null)
+                    if (onlinePlayer != null) {
                         debug("Condition '" + cond + "' by player " + onlinePlayer.getName() + " not met, skipping command execution.");
-                    else
+                    } else {
                         debug("Condition '" + cond + "' without player not met, skipping command execution.");
+                    }
 
                     return;
                 }
@@ -241,12 +243,16 @@ public class Utils {
                 }
             }
 
-            if (sendAs.startsWith("[PLAYER") && onlinePlayer != null)
+            if (sendAs.startsWith("[PLAYER") && onlinePlayer != null) {
                 Bukkit.dispatchCommand(onlinePlayer, cmd);
+            }
 
-            if (sendAs.startsWith("[CONSOLE"))
+            if (sendAs.startsWith("[CONSOLE")) {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
-        } else Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+            }
+        } else {
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), cmd);
+        }
     }
 
     public static void debug(String message) {
@@ -303,8 +309,9 @@ public class Utils {
 
     public static boolean matchesFilter(Player p, String cond) {
         if (cond.toUpperCase().startsWith("PERM") && cond.contains(":")) {
-            if (p == null)
+            if (p == null) {
                 return true;
+            }
 
             debug("Checking permission condition '" + cond + "' for player '" + p.getName() + "'");
 
@@ -326,8 +333,9 @@ public class Utils {
 
                 if (Objects.equals(op, "=") || Objects.equals(op, "==")) {
                     if (!Utils.isDigit(leftStr) && !Utils.isDigit(rightStr)) {
-                        if (leftStr.equalsIgnoreCase(rightStr))
+                        if (leftStr.equalsIgnoreCase(rightStr)) {
                             return true;
+                        }
                     }
                 }
 

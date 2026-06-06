@@ -44,8 +44,9 @@ public class EventJob {
     }
 
     public void performJob(Player player, World world, Event event, List<String> commands) {
-        if (eventType == EventType.JOIN_EVENT && !player.isOnline())
+        if (eventType == EventType.JOIN_EVENT && !player.isOnline()) {
             return;
+        }
 
         if (this.suspended) {
             this.srvCron.log("Job " + EventJob.this.name + " is suspended, skipping...");

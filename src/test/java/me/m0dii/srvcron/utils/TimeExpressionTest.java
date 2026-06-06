@@ -1,16 +1,14 @@
 package me.m0dii.srvcron.utils;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TimeExpressionTest {
     private static final ZoneId UTC = ZoneId.of("Etc/UTC");

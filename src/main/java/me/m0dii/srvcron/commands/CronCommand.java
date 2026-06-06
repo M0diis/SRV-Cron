@@ -34,7 +34,7 @@ public class CronCommand implements CommandExecutor, TabCompleter {
         if (args.length == 0) {
             String helpMsg = langCfg.getHelp();
 
-            if(helpMsg == null) {
+            if (helpMsg == null) {
                 sendf(sender, "&aSRV-Cron by &2M0dii");
                 sendf(sender, "&aVersion: &2" + srvCron.getPluginMeta().getVersion());
                 sendf(sender, "&7/srvcron reload &8- &7reloads the config and jobs.");
@@ -188,9 +188,11 @@ public class CronCommand implements CommandExecutor, TabCompleter {
                         Utils.sendCommand(p, cmd);
                     }
                 } else {
-                    if (sender instanceof Player)
+                    if (sender instanceof Player) {
                         Utils.sendCommand((Player) sender, cmd);
-                    else Utils.sendCommand(null, cmd);
+                    } else {
+                        Utils.sendCommand(null, cmd);
+                    }
                 }
 
             }

@@ -26,8 +26,9 @@ public enum EventType {
 
     public static EventType isEventJob(String string) {
         for (EventType type : values()) {
-            if (type.getConfigName().equalsIgnoreCase(string))
+            if (type.getConfigName().equalsIgnoreCase(string)) {
                 return type;
+            }
         }
 
         return null;

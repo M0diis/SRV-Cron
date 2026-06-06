@@ -72,7 +72,9 @@ public class CronJob {
     }
 
     public void stopJob() {
-        if (task != null) task.cancel();
+        if (task != null) {
+            task.cancel();
+        }
     }
 
     public void runCommands() {
