@@ -10,7 +10,7 @@ tasks.withType<JavaCompile> {
 }
 
 group = "me.m0dii"
-version = "2.12.2"
+version = "2.12.1"
 
 java {
     toolchain {
