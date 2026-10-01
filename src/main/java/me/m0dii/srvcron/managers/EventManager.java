@@ -1,10 +1,12 @@
 package me.m0dii.srvcron.managers;
 
+import io.papermc.paper.event.player.AsyncChatEvent;
 import me.m0dii.srvcron.SRVCron;
 import me.m0dii.srvcron.job.CronJob;
 import me.m0dii.srvcron.job.EventJob;
 import me.m0dii.srvcron.utils.EventType;
 import me.m0dii.srvcron.utils.Utils;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.entity.Item;
@@ -90,7 +92,7 @@ public class EventManager implements Listener {
     }
 
     @EventHandler
-    public void onPlayerChatEvent(AsyncPlayerChatEvent event) {
+    public void onPlayerChatEvent(AsyncChatEvent event) {
         if (ignore(EventType.CHAT_EVENT)) {
             return;
         }
@@ -103,7 +105,7 @@ public class EventManager implements Listener {
             for (int i = 0; i < commands.size(); i++) {
                 String command = commands.get(i);
 
-                command = command.replace("{message}", event.getMessage());
+                command = command.replace("{message}", LegacyComponentSerializer.legacySection().serialize(event.message()));
 
                 commands.set(i, command);
             }
@@ -126,7 +128,9 @@ public class EventManager implements Listener {
             for (int i = 0; i < commands.size(); i++) {
                 String command = commands.get(i);
 
-                String quitMessage = event.getQuitMessage();
+                String quitMessage = event.quitMessage() == null
+                        ? null
+                        : LegacyComponentSerializer.legacySection().serialize(event.quitMessage());
 
                 if (quitMessage != null) {
                     command = command.replace("{quit_reason}", quitMessage);
@@ -275,7 +279,7 @@ public class EventManager implements Listener {
             for (int i = 0; i < commands.size(); i++) {
                 String command = commands.get(i);
 
-                command = command.replace("{kick_reason}", event.getReason());
+                command = command.replace("{kick_reason}", LegacyComponentSerializer.legacySection().serialize(event.reason()));
 
                 commands.set(i, command);
             }

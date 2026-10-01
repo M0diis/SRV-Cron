@@ -33,6 +33,50 @@ Scheduler, jobs, events for your server. Schedule anything that your server need
 
 `<>` neccessary; `[]` optional.
 
+### Scheduled Command Actions
+
+Commands can run as the console by default, or use an action prefix:
+
+```yaml
+commands:
+  - '[MESSAGE] <green>Welcome, %player_name%!'
+  - '[TITLE] <gold>Welcome, <white>%player_name%, 20, 60, 20'
+  - '[ACTIONBAR] &aYour daily reward is ready.'
+  - '[SOUND] ENTITY_EXPERIENCE_ORB_PICKUP, 1, 1'
+  - '[PLAYER] warp home'
+  - '[CONSOLE] give %player_name% diamond 1'
+  - '[BROADCAST] <yellow>The event is starting!'
+  - '[LOG <events.log>] Player event started.'
+```
+
+Supported actions are `[MESSAGE]`/`[TEXT]`, `[TITLE]`, `[ACTIONBAR]`,
+`[SOUND]`, `[PARTICLE]`, `[CHAT]`, `[PLAYER]`, `[OP]`, `[CONSOLE]`,
+`[BROADCAST]`, and `[LOG]`. Titles accept a title and optional subtitle,
+followed by optional fade-in, stay, and fade-out durations in ticks. Sound
+arguments are a sound, volume, and pitch; particle arguments are a particle,
+count, and three offsets.
+
+Prefix conditions can check permissions, PlaceholderAPI values (when PlaceholderAPI
+is installed), or scoreboard scores. They need a player context, such as an
+event job or a command dispatched with `<ALL>`/`<ALL+>`. Join conditions with
+`&&` or `||`; consecutive conditions mean AND, and AND is evaluated before OR:
+
+```yaml
+event-jobs:
+  join-event:
+    welcome:
+      time: 0
+      commands:
+        - '{IF:hasPermission:vip} [MESSAGE] Welcome, VIP!'
+        - '{IF:placeholder:%vault_eco_balance%>=1000} [CONSOLE] give %player_name% diamond 1'
+        - '{IF:score:points>=10} [ACTIONBAR] <green>You have enough points.'
+        - '{IF:hasPermission:vip}||{IF:hasPermission:staff} [BROADCAST] A team member joined.'
+```
+
+Existing action-header filters such as `[TEXT (PERMISSION:staff)] ...` remain
+supported. Messages, titles, action bars, and broadcasts accept MiniMessage and
+legacy `&`/`§` colors, including `&#RRGGBB` and `&x&...` RGB codes.
+
 ### Time Expression Syntax
 
 SRV-Cron supports the original DSL and a broader syntax for readability and advanced use-cases.
@@ -105,17 +149,18 @@ Notes:
 ### Development
 Building is really simple.
 
-To build SRV-Cron, you need JDK 21 and Gradle instayylled on your system.
+To build SRV-Cron, you need JDK 25. The Gradle wrapper downloads the required Gradle version.
 
-The Bukkit implementation targets Paper API `1.21.11-R0.1-SNAPSHOT`.
+The Bukkit implementation targets Paper API `26.2.build.129-stable`.
 
 ```
 git clone https://github.com/M0diis/SRV-Cron.git
 cd SRV-Cron
-gradlew shadowjar
+gradlew shadowJar
 ```
 
-The jar will be generated in `/build/libs/` folder. 
+The jar will be generated in `/build/libs/`. Run `gradlew runServer` to start a
+local Paper 26.2 server with the plugin installed.
 
 ### Dev-builds
 

@@ -1,0 +1,8 @@
+# Changelog
+
+## 2.13.0
+
+- Added message, title, action bar, sound, particle, broadcast, logging, and player or console command actions.
+- Added permission, PlaceholderAPI, and scoreboard conditions for scheduled commands, while retaining existing action filters.
+- Added MiniMessage and legacy color support for player facing messages.
+- Updated the Bukkit target to Paper 26.2.

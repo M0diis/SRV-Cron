@@ -1,11 +1,17 @@
 # Available command actions:
 # [MESSAGE] or [TEXT] -> this will send a direct message to the player.
 # [PLAYER] -> a command will be sent by the player.
+# [OP] -> a command will be sent by the player temporarily granted operator status.
 # [CONSOLE] or none -> a command will be sent by the console.
 # [TITLE] -> will show a title to a player. A more detailed usage below.
+# [ACTIONBAR] -> sends an action bar message to a player.
 # [SOUND] -> this will play a sound to the player.
+# [PARTICLE] -> spawns a particle effect at the player's location.
+# [BROADCAST] -> broadcasts a message to all players.
 # [LOG <logname>] -> this will log a message to a log file.
 # [LOG] -> this will send a log message to the console.
+# Messages, titles, action bars, and broadcasts accept MiniMessage and legacy
+# & / § formatting, including RGB codes such as &#RRGGBB and &x&...
 # ---
 #- <ALL>[PLAYER] will be executed by every online player EXCEPT the player who dispatched the event.
 #- <ALL>[CONSOLE] will be executed by console for every online player. Placeholders will apply to the player.
@@ -44,6 +50,14 @@
 # This works best for placeholders that return numeric values.
 # Operators might work for values that return yes or true, ex.:
 # - '[PLAYER (%player_is_op%)] shout Yay, I'm an OP when this job was executed.'
+# Prefix conditions are also supported: {IF:hasPermission:vip} [MESSAGE] Welcome!
+# Conditions require a player context, such as an event job or a <ALL>/<ALL+> dispatch.
+# Placeholder conditions use PlaceholderAPI when it is installed.
+# Condition types are hasPermission/perm, placeholder/ph, and score.
+# Chain conditions with && or ||. Consecutive conditions imply &&; && is evaluated before ||.
+# Example: '{IF:placeholder:%vault_eco_balance%>=1000} [CONSOLE] give %player_name% diamond 1'
+# Example: '{IF:score:points>=10} [ACTIONBAR] <green>You have enough points.'
+# Placeholder comparisons also support ==, !=, >, <, >=, <=, ~~ (contains), and !~ (does not contain).
 # ---
 # You can also check if player has a permission, ex.:
 # - '[PLAYER (PERMISSION:some.permission)] shout You have the permission!'

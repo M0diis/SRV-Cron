@@ -93,9 +93,9 @@ public class SRVCron extends JavaPlugin {
 
         new UpdateChecker(this, 100382).getVersion(ver ->
         {
-            if (!this.getDescription().getVersion().equalsIgnoreCase(ver)) {
+            if (!this.getPluginMeta().getVersion().equalsIgnoreCase(ver)) {
                 log("You are running an outdated version of SRV-Cron.");
-                log("You are using: " + getDescription().getVersion() + ".");
+                log("You are using: " + getPluginMeta().getVersion() + ".");
                 log("Latest version: " + ver + ".");
                 log("You can download the latest version on Spigot:");
                 log("https://www.spigotmc.org/resources/100382/");

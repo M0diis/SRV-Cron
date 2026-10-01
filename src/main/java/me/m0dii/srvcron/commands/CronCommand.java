@@ -6,8 +6,8 @@ import me.m0dii.srvcron.job.EventJob;
 import me.m0dii.srvcron.managers.CronJobDispatchEvent;
 import me.m0dii.srvcron.utils.LangConfig;
 import me.m0dii.srvcron.utils.ScheduleCalculator;
+import me.m0dii.srvcron.utils.TextTransformer;
 import me.m0dii.srvcron.utils.Utils;
-import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -188,8 +188,8 @@ public class CronCommand implements CommandExecutor, TabCompleter {
                         Utils.sendCommand(p, cmd);
                     }
                 } else {
-                    if (sender instanceof Player) {
-                        Utils.sendCommand((Player) sender, cmd);
+                    if (sender instanceof Player playerSender) {
+                        Utils.sendCommand(playerSender, cmd);
                     } else {
                         Utils.sendCommand(null, cmd);
                     }
@@ -433,13 +433,11 @@ public class CronCommand implements CommandExecutor, TabCompleter {
     }
 
     private void sendf(CommandSender sender, String msg) {
-        String m = ChatColor.translateAlternateColorCodes('&', msg);
-
         if (sender instanceof Player player) {
-            m = Utils.setPlaceholders(m, player);
+            sender.sendMessage(TextTransformer.kyorify(msg, player));
+        } else {
+            sender.sendMessage(TextTransformer.kyorify(msg));
         }
-
-        sender.sendMessage(m);
     }
 
     @Override

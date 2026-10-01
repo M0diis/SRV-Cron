@@ -3,6 +3,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     java
     id("com.gradleup.shadow") version "9.2.2"
+    id("xyz.jpenilla.run-paper") version "3.0.2"
 }
 
 tasks.withType<JavaCompile> {
@@ -10,11 +11,12 @@ tasks.withType<JavaCompile> {
 }
 
 group = "me.m0dii"
-version = "2.12.1"
+version = "2.13.0"
+val pluginVersion = project.version.toString()
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(21))
+        languageVersion.set(JavaLanguageVersion.of(25))
     }
 }
 
@@ -25,7 +27,7 @@ tasks.named<ShadowJar>("shadowJar") {
 
 tasks.processResources {
     filesMatching("**/*.yml") {
-        expand("version" to project.version)
+        expand("version" to pluginVersion)
     }
 }
 
@@ -48,7 +50,8 @@ repositories {
 dependencies {
     implementation("org.bstats:bstats-bukkit:3.0.0")
 
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:26.2.build.129-stable")
+    compileOnly("net.kyori:adventure-text-minimessage:5.2.0")
     compileOnly("me.clip:placeholderapi:2.11.6")
 
     compileOnly("net.md-5:bungeecord-api:1.21-R0.1")
@@ -58,6 +61,12 @@ dependencies {
 
     testImplementation(platform("org.junit:junit-bom:5.11.4"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+}
+
+tasks {
+    runServer {
+        minecraftVersion("26.2")
+    }
 }
 
 tasks.test {

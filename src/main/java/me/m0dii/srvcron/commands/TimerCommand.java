@@ -1,6 +1,7 @@
 package me.m0dii.srvcron.commands;
 
 import me.m0dii.srvcron.SRVCron;
+import me.m0dii.srvcron.utils.TextTransformer;
 import me.m0dii.srvcron.utils.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -20,20 +21,20 @@ public class TimerCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, @NonNull Command cmd,
                              @NonNull String label, String @NonNull [] args) {
         if (!sender.hasPermission("srvcron.command.timer")) {
-            sender.sendMessage("§cYou do not have permission to execute this command.");
+            sendf(sender, "§cYou do not have permission to execute this command.");
 
             return true;
         }
 
         if (args.length == 0) {
-            sender.sendMessage("§aUsage: /timer <time> <command>");
+            sendf(sender, "§aUsage: /timer <time> <command>");
 
             return true;
         }
 
         if (args.length == 1) {
-            sender.sendMessage("§cMissing command argument.");
-            sender.sendMessage("§aUsage: /timer <time> <command>");
+            sendf(sender, "§cMissing command argument.");
+            sendf(sender, "§aUsage: /timer <time> <command>");
 
             return true;
         }
@@ -51,19 +52,19 @@ public class TimerCommand implements CommandExecutor {
         try {
             time = Integer.parseInt(args[0]);
         } catch (NumberFormatException ex) {
-            sender.sendMessage("§cTime must be a valid number.");
+            sendf(sender, "§cTime must be a valid number.");
 
             return true;
         }
 
         if (time < 0) {
-            sender.sendMessage("§cTime cannot be negative.");
+            sendf(sender, "§cTime cannot be negative.");
 
             return true;
         }
 
         if (time > 3600) {
-            sender.sendMessage("§cMaximum amount is 60 minutes!");
+            sendf(sender, "§cMaximum amount is 60 minutes!");
 
             return true;
         }
@@ -80,5 +81,9 @@ public class TimerCommand implements CommandExecutor {
                 Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.setPlaceholders(cmd));
             }
         }.runTaskLater(srvCron, seconds * 20L);
+    }
+
+    private void sendf(CommandSender sender, String message) {
+        sender.sendMessage(TextTransformer.kyorify(message));
     }
 }
