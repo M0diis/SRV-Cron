@@ -32,6 +32,7 @@ import java.util.regex.Pattern;
 public final class CommandActionParser {
     private static final String IF_PREFIX = "{IF:";
     private static final Pattern LEGACY_SELECTOR_PATTERN = Pattern.compile("@([pares])\\[([^\\]]+)]");
+    private static final Pattern EVENT_VALUE_PATTERN = Pattern.compile("\\{([^{}]+)}");
     private static final String[] COMPARISON_OPERATORS = {">=", "<=", "==", "!=", "~~", "!~", "~=", ">", "<"};
     private static final String[] SCORE_OPERATORS = {">=", "<=", "==", "!=", ">", "<"};
 
@@ -62,6 +63,17 @@ public final class CommandActionParser {
      * for existing configurations.</p>
      */
     public static void parse(@Nullable OfflinePlayer player, @NotNull String rawCommand) {
+        parse(player, rawCommand, Map.of());
+    }
+
+    public static void parse(@Nullable OfflinePlayer player, @NotNull String rawCommand,
+                             @NotNull Map<String, String> eventPlaceholders) {
+        parse(player, rawCommand, eventPlaceholders, Map.of());
+    }
+
+    public static void parse(@Nullable OfflinePlayer player, @NotNull String rawCommand,
+                             @NotNull Map<String, String> eventPlaceholders,
+                             @NotNull Map<String, Component> componentPlaceholders) {
         String command = rawCommand.trim();
         if (command.isEmpty()) {
             return;
@@ -100,7 +112,7 @@ public final class CommandActionParser {
         }
 
         if (!command.startsWith("[")) {
-            dispatchConsoleCommand(resolvePlaceholders(player, command));
+            dispatchConsoleCommand(resolvePlaceholders(player, command, eventPlaceholders));
             return;
         }
 
@@ -120,7 +132,7 @@ public final class CommandActionParser {
                 warn("Invalid action filter syntax: [" + actionHeader + "]");
                 return;
             }
-            String filter = resolvePlaceholders(player, actionHeader.substring(filterStart + 1, filterEnd).trim());
+            String filter = resolvePlaceholders(player, actionHeader.substring(filterStart + 1, filterEnd).trim(), eventPlaceholders);
             if (!matchesLegacyFilter(player, filter)) {
                 return;
             }
@@ -131,7 +143,7 @@ public final class CommandActionParser {
         String action = (firstSpace < 0 ? actionHeader : actionHeader.substring(0, firstSpace)).toUpperCase(Locale.ROOT);
         String actionArguments = firstSpace < 0 ? "" : actionHeader.substring(firstSpace + 1).trim();
 
-        executeAction(player, action, actionArguments, actionCommand);
+        executeAction(player, action, actionArguments, actionCommand, eventPlaceholders, componentPlaceholders);
     }
 
     private static boolean evaluateConditions(OfflinePlayer player, List<String> conditions, List<Boolean> operators) {
@@ -280,24 +292,26 @@ public final class CommandActionParser {
         return compare(score.getScore(), expected, operator);
     }
 
-    private static void executeAction(OfflinePlayer player, String action, String arguments, String rawCommand) {
+    private static void executeAction(OfflinePlayer player, String action, String arguments, String rawCommand,
+                                      Map<String, String> eventPlaceholders,
+                                      Map<String, Component> componentPlaceholders) {
         Player onlinePlayer = player instanceof Player target && target.isOnline() ? target : null;
-        String command = resolvePlaceholders(player, rawCommand);
+        String command = resolvePlaceholders(player, rawCommand, eventPlaceholders);
 
         switch (action) {
             case "MESSAGE", "TEXT" -> {
                 if (onlinePlayer != null) {
-                    onlinePlayer.sendMessage(TextTransformer.kyorify(rawCommand, player));
+                    onlinePlayer.sendMessage(TextTransformer.kyorify(rawCommand, player, eventPlaceholders, componentPlaceholders));
                 }
             }
             case "TITLE" -> {
                 if (onlinePlayer != null) {
-                    parseTitle(onlinePlayer, rawCommand, player);
+                    parseTitle(onlinePlayer, rawCommand, player, eventPlaceholders, componentPlaceholders);
                 }
             }
             case "ACTIONBAR" -> {
                 if (onlinePlayer != null) {
-                    onlinePlayer.sendActionBar(TextTransformer.kyorify(rawCommand, player));
+                    onlinePlayer.sendActionBar(TextTransformer.kyorify(rawCommand, player, eventPlaceholders, componentPlaceholders));
                 }
             }
             case "CHAT" -> {
@@ -326,7 +340,7 @@ public final class CommandActionParser {
                 }
             }
             case "CONSOLE" -> dispatchConsoleCommand(command);
-            case "BROADCAST" -> Bukkit.broadcast(TextTransformer.kyorify(rawCommand, player));
+            case "BROADCAST" -> Bukkit.broadcast(TextTransformer.kyorify(rawCommand, player, eventPlaceholders, componentPlaceholders));
             case "LOG" -> logAction(arguments, command);
             default -> dispatchConsoleCommand(command);
         }
@@ -371,7 +385,8 @@ public final class CommandActionParser {
         return false;
     }
 
-    private static String resolvePlaceholders(@Nullable OfflinePlayer player, String input) {
+    private static String resolvePlaceholders(@Nullable OfflinePlayer player, String input,
+                                              Map<String, String> eventPlaceholders) {
         if (player != null && player.getName() != null) {
             input = input.replaceAll("(?i)%player_name%", Matcher.quoteReplacement(player.getName()));
         }
@@ -379,9 +394,28 @@ public final class CommandActionParser {
             input = input.replaceAll("(?i)%player_uuid%", Matcher.quoteReplacement(player.getUniqueId().toString()));
         }
         if (Bukkit.getPluginManager() != null && Bukkit.getPluginManager().isPluginEnabled("PlaceholderAPI")) {
-            return PlaceholderAPI.setPlaceholders(player, input);
+            input = PlaceholderAPI.setPlaceholders(player, input);
         }
-        return input;
+
+        Matcher matcher = EVENT_VALUE_PATTERN.matcher(input);
+        StringBuilder resolved = new StringBuilder(input.length());
+        int lastEnd = 0;
+        while (matcher.find()) {
+            resolved.append(input, lastEnd, matcher.start());
+            String key = matcher.group(1).trim();
+            if (eventPlaceholders.containsKey(key)) {
+                resolved.append(eventPlaceholders.get(key));
+            } else {
+                resolved.append(matcher.group());
+            }
+            lastEnd = matcher.end();
+        }
+        resolved.append(input, lastEnd, input.length());
+        return resolved.toString();
+    }
+
+    private static String resolvePlaceholders(@Nullable OfflinePlayer player, String input) {
+        return resolvePlaceholders(player, input, Map.of());
     }
 
     private static String normalizeCommandForDispatch(String rawCommand) {
@@ -489,7 +523,9 @@ public final class CommandActionParser {
         }
     }
 
-    private static void parseTitle(Player player, String command, OfflinePlayer placeholderPlayer) {
+    private static void parseTitle(Player player, String command, OfflinePlayer placeholderPlayer,
+                                   Map<String, String> eventPlaceholders,
+                                   Map<String, Component> componentPlaceholders) {
         String[] arguments = command.split("\\s*,\\s*");
         String titleText;
         String subtitleText = "";
@@ -524,8 +560,9 @@ public final class CommandActionParser {
         }
 
         Title.Times times = Title.Times.times(ticks(fadeIn), ticks(stay), ticks(fadeOut));
-        Component title = TextTransformer.kyorify(titleText, placeholderPlayer);
-        Component subtitle = subtitleText.isEmpty() ? Component.empty() : TextTransformer.kyorify(subtitleText, placeholderPlayer);
+        Component title = TextTransformer.kyorify(titleText, placeholderPlayer, eventPlaceholders, componentPlaceholders);
+        Component subtitle = subtitleText.isEmpty() ? Component.empty()
+                : TextTransformer.kyorify(subtitleText, placeholderPlayer, eventPlaceholders, componentPlaceholders);
         player.showTitle(Title.title(title, subtitle, times));
     }
 

@@ -2,14 +2,17 @@ package me.m0dii.srvcron.managers;
 
 import lombok.Getter;
 import me.m0dii.srvcron.job.EventJob;
+import me.m0dii.srvcron.job.EventJobContext;
 import me.m0dii.srvcron.utils.EventType;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 
 public class EventJobDispatchEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS_LIST = new HandlerList();
@@ -22,28 +25,27 @@ public class EventJobDispatchEvent extends Event implements Cancellable {
     private final Player player;
     @Getter
     private final World world;
+    @Getter
+    private final EventJobContext context;
 
     private List<String> jobCommands;
 
     private boolean isCancelled;
 
     public EventJobDispatchEvent(EventJob eventJob, Event event, Player player, World world) {
-        this.eventJob = eventJob;
-        this.event = event;
-
-        this.player = player;
-        this.world = world;
-
-        this.jobCommands = eventJob.getCommands();
+        this(eventJob, new EventJobContext(event, player, world, Map.of()), eventJob.getCommands());
     }
 
     public EventJobDispatchEvent(EventJob eventJob, Event event, Player player, World world, List<String> commands) {
+        this(eventJob, new EventJobContext(event, player, world, Map.of()), commands);
+    }
+
+    public EventJobDispatchEvent(EventJob eventJob, EventJobContext context, List<String> commands) {
         this.eventJob = eventJob;
-        this.event = event;
-
-        this.player = player;
-        this.world = world;
-
+        this.context = context;
+        this.event = context.getEvent();
+        this.player = context.getPlayer();
+        this.world = context.getWorld();
         this.jobCommands = commands;
     }
 
@@ -60,12 +62,26 @@ public class EventJobDispatchEvent extends Event implements Cancellable {
         return eventJob.getName();
     }
 
+    /** Returns the legacy event enum, or {@code null} for a generic event job. */
+    @Nullable
     public EventType getEventType() {
         return eventJob.getEventType();
     }
 
     public String getJobConfigName() {
-        return eventJob.getEventType().getConfigName();
+        return eventJob.getEventIdentifier();
+    }
+
+    public String getEventIdentifier() {
+        return eventJob.getEventIdentifier();
+    }
+
+    public Class<? extends Event> getEventClass() {
+        return eventJob.getEventClass();
+    }
+
+    public Map<String, String> getEventPlaceholders() {
+        return context.getPlaceholders();
     }
 
     public List<String> getEventJobCommands() {

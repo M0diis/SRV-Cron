@@ -1,0 +1,353 @@
+[CENTER][FONT=Book Antiqua][SIZE=5]Continuation of the well-known Cron plugin - [URL='https://www.spigotmc.org/resources/mc-cron-scheduler-jobs-bungeecord-support.37632/']MC-Cron.[/URL]
+All credits goes to the original author - TheTadeSK.[/SIZE][/FONT]
+[/CENTER]
+[FONT=Book Antiqua][SIZE=4][COLOR=#000000]SRV-Cron is a all-in-one minecraft server scheduler that has many features to schedule jobs for certain times or in-game events.
+
+It is a continuation of a well-known Cron plugin - MC-Cron with a lot of additional and expanded features that original MC-Cron plugin does not provide, such as PlaceholderAPI support, sending commands as players, variable actions and condition checking.[/COLOR]
+[FONT=Book Antiqua][SIZE=4][B]Current release:[/B] 2.14.0 · [B]Target:[/B] Paper 26.2 · [B]Java:[/B] 25[/SIZE][/FONT]
+[FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][U]_________________________________________________[/U][/FONT][/FONT][/FONT][/SIZE][/FONT]
+[SIZE=4][FONT=Book Antiqua]
+[FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][SIZE=5][B]# FEATURES[/B][/SIZE][/FONT][/FONT][/FONT][/FONT][/FONT][/SIZE]
+
+[FONT=Book Antiqua][SIZE=4]These are some of the features that this plugin provides.[/SIZE]
+
+[B][B]•[/B][/B] Customizable jobs;
+[B][B]• [/B][/B]Console, player, and operator command execution;
+[B][B]•[/B][/B] Execute commands by every online player;
+[B][B]•[/B][/B] Send messages, titles, and action bars;
+[B][B]•[/B][/B] Play sounds and spawn particle effects;
+[B][B]•[/B][/B] Broadcast messages and write scheduled logs;
+[B][B]•[/B][/B] Filter actions by permissions, PlaceholderAPI values, or scoreboard scores;
+[B][B]•[/B][/B] Event jobs & commands;
+[B][B]•[/B][/B] Start-up commands;
+[B][B]•[/B][/B] Delayed command execution (/timer);
+[B][B]•[/B][/B] [B]BungeeCord [/B]support;
+[B][B]•[/B][/B] [B]PlaceholderAPI [/B]support[B];[/B][/FONT]
+
+[FONT=Book Antiqua][B]COMMAND ACTIONS & CONDITIONS[/B]
+Scheduled commands run as the console by default. Action prefixes can send messages, show titles or action bars, play sounds, spawn particles, chat or run commands as a player, run commands as an operator, broadcast, or log output.
+
+Supported prefixes: [B][MESSAGE]/[TEXT], [TITLE], [ACTIONBAR], [SOUND], [PARTICLE], [CHAT], [PLAYER], [OP], [CONSOLE], [BROADCAST], [LOG], and [LOG with a file name][/B].
+
+Messages, titles, action bars, and broadcasts support MiniMessage and legacy &/§ color codes, including RGB formats. Prefix conditions support permissions, PlaceholderAPI comparisons (when PlaceholderAPI is installed), scoreboard scores, and combinations using [B]&&[/B] and [B]||[/B]:
+[code]
+- '{IF:hasPermission:vip} [MESSAGE] <gold>Welcome, %player_name%!'
+- '{IF:placeholder:%vault_eco_balance%>=1000} [CONSOLE] give %player_name% diamond 1'
+- '{IF:score:points>=10} [ACTIONBAR] &aYou have enough points.'
+[/code]
+Conditions require a player context, such as an event job or a command dispatched for &lt;ALL&gt;/&lt;ALL+&gt;. Existing action-header filters such as [TEXT (PERMISSION:staff)] ... remain supported.
+</FONT>
+
+[FONT=Book Antiqua][B]AVAILABLE EVENTS[/B]
+(Use these values in configuration)
+- join-event
+- quit-event
+- weather-change-event
+- world-load-event
+- player-bed-enter-event
+- player-bed-leave-event
+- player-change-world-event
+- player-gamemode-change-event
+- player-kick-event
+- chat-event
+- command-event
+- item-pickup-event
+- player-advancement-done-event
+
+[B]GENERIC PAPER/BUKKIT EVENT JOBS[/B]
+Use [B]generic-event-jobs[/B] to register any Bukkit/Paper [B]Event[/B] class
+that provides the standard [B]HandlerList[/B], including events from enabled
+plugins. Configure the fully qualified class name, event priority,
+cancelled-event handling, optional player/world getter paths, property aliases,
+and jobs. Public zero-argument [B]getX()/isX()[/B] getters are supported, with
+numeric [B][index][/B] access for lists and arrays. Use [B]{event.<path>}[/B]
+directly or give a path a shorter name under [B]placeholders[/B]. Event values
+are captured when the event fires, including for delayed jobs.
+
+[code=YAML]
+generic-event-jobs:
+  item-pickup:
+    event: org.bukkit.event.player.PlayerAttemptPickupItemEvent
+    priority: NORMAL
+    ignore-cancelled: false
+    context:
+      player: player
+      world: player.world
+    placeholders:
+      item_type: item.itemStack.type
+      item_amount: item.itemStack.amount
+    jobs:
+      announce:
+        time: 0
+        commands:
+          - '[MESSAGE] Picked up {event.item.itemStack.amount} {item_type}'
+[/code]
+
+Player and world context are inferred when an event exposes one unambiguous
+value; configure [B]context.player[/B] or [B]context.world[/B] to select a
+getter path when needed. Existing [B]event-jobs[/B] and BungeeCord join/quit
+events remain available.
+
+[B]BUILT-IN PLACEHOLDERS[/B]
+- {[B]player_name}[/B] - for events that relate to a player.
+- {[B]world_name}[/B] - for events that relate to a world.
+
+.. and bunch more event-specific placeholders, read more at:
+[URL]https://github.com/M0diis/SRV-Cron/wiki/Configuration#events[/URL]
+
+You can use both placeholders if event relates to both player and a world (ex. player-change-world-event)
+
+[B]BungeeCord has only two events available, join & quit.[/B]
+[SIZE=4][FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][U]_________________________________________________[/U][/FONT][/FONT][/FONT][/FONT][/SIZE][/FONT]
+[SIZE=4][FONT=Book Antiqua]
+[FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][SIZE=5][B]# COMMANDS & PERMISIONS[/B][/SIZE][/FONT][/FONT][/FONT][/FONT][/FONT][/SIZE]
+
+[FONT=Book Antiqua][B]RUN COMMAND AFTER SPECIFIED SECONDS[/B]
+Command: /timer <seconds> <command>
+Permission: srvcron.command.timer
+
+[B]RELOAD CONFIGURATION & JOBS[/B]
+Command: /srvcron reload
+Permission: srvcron.command.reload
+
+[B]RUN CRON OR EVENT JOB MANUALLY[/B]
+Command: /srvcron run <job-name> or /srvcron run event <event-name>
+Permission: srvcron.command.run
+
+[B]SUSPEND JOB EXECUTION[/B]
+Command: /srvcron suspend <job-name>
+Permission: srvcron.command.suspend
+
+[B]RESUME JOB EXECUTION[/B]
+Command: /srvcron resume <job-name>
+Permission: srvcron.command.resume
+
+[B]JOB INFORMATION[/B]
+Command: /srvcron jobinfo <job-name>
+Permission: srvcron.command.jobinfo
+
+[B]JOB & EVENT LIST[/B]
+Command: /srvcron list [events]
+Permission: srvcron.command.list
+[SIZE=4][FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][U]_________________________________________________[/U][/FONT][/FONT][/FONT][/FONT][/SIZE][/FONT]
+[SIZE=4][FONT=Book Antiqua]
+[FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][SIZE=5][B]# CONFIGURATION[/B][/SIZE][/FONT][/FONT][/FONT][/FONT][/FONT][/SIZE]
+
+[FONT=Book Antiqua][SIZE=4]Configuration is pretty simple and easy to understand.
+For more detailed explanation, visit Github wiki page:[/SIZE]
+[URL='https://github.com/M0diis/SRV-Cron/wiki/Configuration'][B]Configuration · M0diis/SRV-Cron Wiki[/B][/URL]
+
+[B]DEFAULT CONFIGURATION[/B]
+[code=YAML]
+# Available command actions:
+# [MESSAGE] or [TEXT] -> sends a direct message to the player.
+# [TITLE] -> shows a title; optional subtitle and fade-in/stay/fade-out times.
+# [ACTIONBAR] -> sends an action bar message to the player.
+# [SOUND] -> plays a sound to the player.
+# [PARTICLE] -> spawns particles at the player's location.
+# [CHAT] -> sends chat as the player.
+# [PLAYER] -> dispatches a command as the player.
+# [OP] -> dispatches a command as the player with operator permissions.
+# [CONSOLE] or no prefix -> dispatches a command as the console.
+# [BROADCAST] -> sends a message to all players.
+# [LOG <logname>] -> writes to a log file; [LOG] sends the message to console.
+# Messages, titles, action bars, and broadcasts support MiniMessage and legacy
+# &/§ colors, including RGB formats.
+# ---
+#- <ALL>[PLAYER] will be executed by every online player EXCEPT the player who dispatched the event.
+#- <ALL>[CONSOLE] will be executed by console for every online player. Placeholders will apply to the player.
+#- will be executed once via the server console.
+# ---
+# "<ALL+>" in Event-Job will be executed by every online player INCLUDING the player who dispatched the event.
+# Use {placeholder} to apply a placeholder to the player who dispatched the event.
+# ---
+# Detailed explanation:
+# This will play a sound to the player.
+# The first argument is the sound, the second is the volume and the third is the pitch.
+# You can find a list of sounds here: https://www.digminecraft.com/lists/sound_list_pc.php
+#  - '[SOUND] ENTITY.PLAYER.LEVELUP, 1.0, 1.0'
+# This will show a title to the player.
+# The first argument is the title, the second is the subtitle.
+# The last three are: fade-in, stay and fade-out times.
+#  - '[TITLE] This is a title, This is a subtitle, 20, 60, 20'
+# Alternatively you can use opt out the subtitle or the times, or just the subtitle.
+#  - '[TITLE] This is a title'
+#  - '[TITLE] This is a title, 20, 60, 20'
+# ---
+# Prefix conditions support permissions, PlaceholderAPI values, and scoreboard
+# scores. Use && for AND and || for OR; AND is evaluated before OR.
+# Placeholder comparisons support >, >=, <, <=, ==, !=, ~~ (contains), and !~.
+# Score comparisons support >, >=, <, <=, ==, and !=.
+# Examples:
+# - '{IF:hasPermission:some.permission} [PLAYER] shout You have the permission!'
+# - '{IF:placeholder:%vault_eco_balance%>1000} [TITLE] You have enough balance!'
+# - '{IF:score:points>=10} [ACTIONBAR] &aYou reached 10 points!'
+# PlaceholderAPI conditions need PlaceholderAPI installed. All conditions need
+# a player context. Legacy action-header filters such as [PLAYER (PERM:staff)]
+# remain supported.
+jobs:
+  save:
+    time: every 1 hour
+    commands:
+      - say Saving world!
+      - save-all
+      - say Save Complete!
+  restart:
+    time: every 1 day of week at 6:00
+    commands:
+      - say Server restart in 10 seconds!
+      - timer 10 stop
+  tps:
+    time: every 30 minutes
+    commands:
+      - tps
+# If you do not want to use any event jobs, use:
+# event-jobs: { }
+event-jobs:
+  join-event:
+    welcome:
+      time: 1
+      commands:
+        - tell {player_name} Hello!
+        - <ALL>[CHAT] Hello {player_name}!
+  quit-event:
+    bye:
+      time: 5
+      commands:
+        - say {player_name} left the game few seconds ago.
+  player-gamemode-change-event:
+    whisper:
+      time: 0
+      commands:
+        - "<ALL> [TEXT (PERM:staff.notify.gamemode)] Player {player_name} changed his gamemode from {from_gamemode} to {to_gamemode}"
+# Generic Bukkit/Paper event example:
+# generic-event-jobs:
+#   item-pickup:
+#     event: org.bukkit.event.player.PlayerAttemptPickupItemEvent
+#     priority: NORMAL
+#     ignore-cancelled: false
+#     context:
+#       player: player
+#       world: player.world
+#     placeholders:
+#       item_type: item.itemStack.type
+#     jobs:
+#       announce:
+#         time: 0
+#         commands:
+#           - '[MESSAGE] Picked up {event.item.itemStack.amount} {item_type}'
+startup:
+  commands:
+    - say Server was started!
+    - timer 60 say Server is online for 1 minute!
+    - save-all
+    - '[LOG <server_startup.log>] Server has been started.'
+
+schedule:
+  # Controls numeric weekdays in expressions like: every day of week in 1,5 at 12:00
+  # Supported: monday-first (default, ISO), sunday-first (legacy), iso, legacy
+  weekday-numbering: monday-first
+
+debug: false
+silent-start: false
+notify-update: true
+log-to-file: true
+locale: 'en'
+[/code]
+
+Syntax:
+[code]
+# named weekdays
+time: every wednesday at 00:00
+time: every monday,friday at 18:30
+
+# list/range support
+time: every day of week in 1,3,5 at 12:00
+time: every day of week in 2..6 at 07:45
+time: every day of month in 1..5 at 09:00
+
+# plain intervals
+time: every 30 seconds
+time: every 5 minutes
+time: every 1 hour
+time: every 2 days
+
+# multiple times per day
+time: every day at 08:00,12:00,18:00
+
+# time windows
+time: every 15 minutes from 09:00 to 17:00
+time: every 20 minutes from 23:00 to 03:00
+
+# nth / last weekday in month
+time: every 2nd monday of month at 10:00
+time: every last friday of month at 22:00
+
+# relative calendar keywords
+time: every weekday at 09:00
+time: every weekend at 11:00
+time: every month on last-day at 23:55
+
+# month-name schedules
+time: every january,march day 1 at 08:00
+
+# start/end constraints
+time: every 1 hour between 2026-06-01 and 2026-09-01
+
+# per-job timezone and jitter
+# options order is: ... [between ...] [jitter ...] [timezone ...]
+time: every day at 09:00 timezone Europe/Berlin
+time: every 5 minutes jitter 30s
+time: every 10 minutes jitter 2m timezone Europe/Berlin
+
+# one-shot execution
+time: at 2026-06-10 14:30
+
+# classic cron expression (opt-in)
+time: cron: 0 0 * * 3
+time: cron: */15 9-17 * * mon-fri
+[/code][/FONT]
+
+[FONT=Book Antiqua][B]Notes:[/B]
+- Cron format is "minute hour day-of-month month day-of-week".
+- Cron supports "*", lists (,), ranges (-), and steps (/) in each field.
+- Cron month/day-of-week names are supported (e.g. "jan", "mon-fri").
+- Day-of-week DSL numbers stay compatible with existing configs (1=Sunday ... 7=Saturday).
+- Legacy expressions are still accepted for backward compatibility:
+  - "every 4 day of week at 00:00" (or without "at", defaults to "00:00")
+  - "every 1 day of month at 09:00" (or without "at", defaults to "00:00")
+
+[FONT=Book Antiqua][SIZE=4][FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][U]_________________________________________________[/U][/FONT][/FONT][/FONT][/FONT][/FONT][/SIZE][/FONT][/FONT]
+[SIZE=4][FONT=Book Antiqua]
+[FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][SIZE=5][B]# API[/B][/SIZE][/FONT][/FONT][/FONT][/FONT][/FONT][/SIZE]
+
+[FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][FONT=Book Antiqua][SIZE=4]For more detailed explanation, visit Github wiki page:[/SIZE]
+[URL='https://github.com/M0diis/SRV-Cron/wiki/API']API · M0diis/SRV-Cron Wiki (github.com)[/URL]
+
+There are currently 3 events that are fired upon certain actions.
+[/FONT][/FONT]
+[B][B][B]•[/B][/B] [URL='https://github.com/M0diis/SRV-Cron/blob/main/src/main/java/me/m0dii/srvcron/managers/CronJobDispatchEvent.java'][SIZE=4]CronJobDispatchEvent[/SIZE][/URL][/B]
+[B][B][B]•[/B][/B] [URL='https://github.com/M0diis/SRV-Cron/blob/main/src/main/java/me/m0dii/srvcron/managers/CronJobDispatchEvent.java'][SIZE=4]CronJobDispatchEvent[/SIZE][/URL][/B]
+[SIZE=4][B][B][B]•[/B][/B] [URL='https://github.com/M0diis/SRV-Cron/blob/main/src/main/java/me/m0dii/srvcron/managers/StartupCommandDispatchEvent.java']StartupCommandDispatchEvent[/URL][/B][/SIZE]
+
+You can also interact with the [URL='https://github.com/M0diis/SRV-Cron/blob/main/src/main/java/me/m0dii/srvcron/SRVCronAPI.java']API[/URL].[/FONT]
+[U]_________________________________________________[/U]
+
+[FONT=Book Antiqua][FONT=Book Antiqua][SIZE=5][B]MY OTHER PLUGINS[/B][/SIZE][/FONT]
+[/FONT][/FONT]
+[B]• [URL='http://%20https//www.spigotmc.org/resources/91863']CoreCord[/URL] -[/B] CoreProtect integration for Discord.
+[B][B]•[/B][URL='https://www.spigotmc.org/resources/88737'][B] ExtraEnchants [/B][/URL]- [/B]Simple additional enchantments for your server.
+[B][B]•[/B][URL='https://www.spigotmc.org/resources/86811/'][B] AntiAnvilRename[/B][/URL] - [/B]Prevent players from renaming certain items using anvils.
+[B][B]•[/B][URL='https://www.spigotmc.org/resources/100596'][B] SimpleBombs [/B][/URL]- [/B]Customizable bombs for prison and other servers.
+[B][FONT=Book Antiqua][FONT=Book Antiqua][B]•[/B][URL='https://www.spigotmc.org/resources/simplebombs.100596'] [/URL][/FONT][/FONT][/B][URL='https://www.spigotmc.org/resources/99128/'][B]VenturaCalendar[/B][/URL] - In-game calendar with customizable events and much more.
+[B][FONT=Book Antiqua][FONT=Book Antiqua][B]•[/B][URL='https://www.spigotmc.org/resources/simplebombs.100596'] [/URL][/FONT][/FONT][URL='https://www.spigotmc.org/resources/86813']OnlinePlayersGUI[/URL] [/B]- Online players in a GUI. Filter by conditions, placeholders.
+
+[FONT=Book Antiqua][URL='https://www.spigotmc.org/resources/authors/m0dii.450794/']Resources from M0dii[/URL] - all plugins.[/FONT]
+[U]_________________________________________________[/U]
+
+[FONT=Book Antiqua]Please leave a positive review if the plugin works as intended, if you have an issue contact me on discord provided or open an issue on github.[/FONT]
+
+[FONT=Book Antiqua]If you're feeling generous and enjoy my plugins - you can support my work here:
+- PayPal: [URL]https://www.paypal.com/paypalme/ModestasKazlauskas[/URL]
+- Ko-fi: [URL]https://ko-fi.com/m0dii[/URL][/FONT]
+[/FONT]

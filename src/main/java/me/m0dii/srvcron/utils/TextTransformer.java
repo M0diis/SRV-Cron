@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 public class TextTransformer {
     private static final MiniMessage MINI_MESSAGE = MiniMessage.miniMessage();
     private static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("%[^%\\s]+%");
+    private static final Pattern EVENT_PLACEHOLDER_PATTERN = Pattern.compile("\\{([^{}]+)}");
 
     private static final Map<String, Character> SMALL_CAPS_MAP = Map.ofEntries(
             Map.entry("a", 'ᴀ'), Map.entry("b", 'ʙ'), Map.entry("c", 'ᴄ'),
@@ -237,23 +238,59 @@ public class TextTransformer {
 
     @NotNull
     public static Component kyorify(@NotNull String text, @Nullable OfflinePlayer player) {
-        return kyorify(text, player, true);
+        return kyorify(text, player, Map.of(), Map.of());
+    }
+
+    public static Component kyorify(@NotNull String text, @Nullable OfflinePlayer player,
+                                    @NotNull Map<String, String> eventPlaceholders) {
+        return kyorify(text, player, eventPlaceholders, Map.of());
+    }
+
+    public static Component kyorify(@NotNull String text, @Nullable OfflinePlayer player,
+                                    @NotNull Map<String, String> eventPlaceholders,
+                                    @NotNull Map<String, Component> componentPlaceholders) {
+        return kyorify(text, player, eventPlaceholders, componentPlaceholders, true);
     }
 
     static Component kyorifyWithoutPlaceholderExpansion(@NotNull String text) {
-        return kyorify(text, null, false);
+        return kyorify(text, null, Map.of(), Map.of(), false);
     }
 
-    private static Component kyorify(@NotNull String text, @Nullable OfflinePlayer player, boolean expandPlaceholders) {
+    private static Component kyorify(@NotNull String text, @Nullable OfflinePlayer player,
+                                     @NotNull Map<String, String> eventPlaceholders,
+                                     @NotNull Map<String, Component> componentPlaceholders,
+                                     boolean expandPlaceholders) {
         String namespace = "srvcron_" + UUID.randomUUID().toString().replace("-", "");
-        StringBuilder safeText = new StringBuilder(text.length());
         TagResolver.Builder placeholders = TagResolver.builder();
-        Matcher matcher = PLACEHOLDER_PATTERN.matcher(text);
+        StringBuilder eventText = new StringBuilder(text.length());
+        Matcher eventMatcher = EVENT_PLACEHOLDER_PATTERN.matcher(text);
         int lastEnd = 0;
         int index = 0;
 
+        while (eventMatcher.find()) {
+            eventText.append(text, lastEnd, eventMatcher.start());
+            String key = eventMatcher.group(1).trim();
+            if (eventPlaceholders.containsKey(key) || componentPlaceholders.containsKey(key)) {
+                String tag = namespace + "_event_" + index++;
+                eventText.append('<').append(tag).append('>');
+                Component component = componentPlaceholders.get(key);
+                if (component != null) {
+                    placeholders.resolver(Placeholder.component(tag, component));
+                } else {
+                    placeholders.resolver(Placeholder.unparsed(tag, eventPlaceholders.getOrDefault(key, "")));
+                }
+            } else {
+                eventText.append(eventMatcher.group());
+            }
+            lastEnd = eventMatcher.end();
+        }
+        eventText.append(text, lastEnd, text.length());
+
+        StringBuilder safeText = new StringBuilder(eventText.length());
+        Matcher matcher = PLACEHOLDER_PATTERN.matcher(eventText);
+        lastEnd = 0;
         while (matcher.find()) {
-            safeText.append(text, lastEnd, matcher.start());
+            safeText.append(eventText, lastEnd, matcher.start());
             String placeholder = matcher.group();
             String tag = namespace + '_' + index++;
             safeText.append('<').append(tag).append('>');
@@ -261,7 +298,7 @@ public class TextTransformer {
             placeholders.resolver(Placeholder.unparsed(tag, value));
             lastEnd = matcher.end();
         }
-        safeText.append(text, lastEnd, text.length());
+        safeText.append(eventText, lastEnd, eventText.length());
 
         return MINI_MESSAGE.deserialize(Kyorifier.kyorify(safeText.toString()), placeholders.build())
                 .decoration(TextDecoration.ITALIC, false);

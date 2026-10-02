@@ -9,8 +9,10 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 
 public class EventJob {
     private final SRVCron srvCron;
@@ -19,8 +21,12 @@ public class EventJob {
     private final int time;
     @Getter
     private final List<String> commands;
-    @Getter
+    @Nullable
     private final EventType eventType;
+    @Getter
+    private final String eventIdentifier;
+    @Getter
+    private final Class<? extends Event> eventClass;
 
     @Getter
     private boolean suspended = false;
@@ -33,6 +39,19 @@ public class EventJob {
         this.time = time;
         this.commands = commands;
         this.eventType = eventType;
+        this.eventIdentifier = eventType.getConfigName();
+        this.eventClass = null;
+    }
+
+    public EventJob(SRVCron srvCron, String name, int time, List<String> commands, String eventIdentifier,
+                    Class<? extends Event> eventClass) {
+        this.srvCron = srvCron;
+        this.name = name;
+        this.time = time;
+        this.commands = commands;
+        this.eventType = null;
+        this.eventIdentifier = eventIdentifier;
+        this.eventClass = eventClass;
     }
 
     public void performJob(Player player) {
@@ -44,7 +63,15 @@ public class EventJob {
     }
 
     public void performJob(Player player, World world, Event event, List<String> commands) {
-        if (eventType == EventType.JOIN_EVENT && !player.isOnline()) {
+        performJob(new EventJobContext(event, player, world, Map.of()), commands);
+    }
+
+    public void performJob(EventJobContext context) {
+        performJob(context, commands);
+    }
+
+    private void performJob(EventJobContext context, List<String> commands) {
+        if (eventType == EventType.JOIN_EVENT && context.getPlayer() != null && !context.getPlayer().isOnline()) {
             return;
         }
 
@@ -55,7 +82,7 @@ public class EventJob {
         }
 
         if (time == 0) {
-            Runnable eventDispatchTask = () -> Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, event, player, world, commands));
+            Runnable eventDispatchTask = () -> Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, context, commands));
 
             if (Bukkit.isPrimaryThread()) {
                 eventDispatchTask.run();
@@ -66,7 +93,7 @@ public class EventJob {
             new BukkitRunnable() {
                 @Override
                 public void run() {
-                    Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, event, player, world, commands));
+                    Bukkit.getPluginManager().callEvent(new EventJobDispatchEvent(EventJob.this, context, commands));
                 }
             }.runTaskLater(srvCron, time * 20L);
         }
@@ -78,6 +105,12 @@ public class EventJob {
 
     public void increaseRunCount() {
         runCount++;
+    }
+
+    /** Returns the legacy event enum, or {@code null} for a generic event job. */
+    @Nullable
+    public EventType getEventType() {
+        return eventType;
     }
 
     public void suspend() {

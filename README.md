@@ -77,6 +77,41 @@ Existing action-header filters such as `[TEXT (PERMISSION:staff)] ...` remain
 supported. Messages, titles, action bars, and broadcasts accept MiniMessage and
 legacy `&`/`§` colors, including `&#RRGGBB` and `&x&...` RGB codes.
 
+### Generic Event Jobs
+
+In addition to the built-in event names, `generic-event-jobs` can listen to
+Bukkit/Paper events by class name, including events from enabled plugins. The
+event class must extend Bukkit `Event` and provide the standard `HandlerList`.
+Each configured event can set its Bukkit priority, choose whether cancelled
+events are ignored, and define property aliases and player/world context paths:
+
+```yaml
+generic-event-jobs:
+  item-pickup:
+    event: org.bukkit.event.player.PlayerAttemptPickupItemEvent
+    priority: NORMAL
+    ignore-cancelled: false
+    context:
+      player: player
+      world: player.world
+    placeholders:
+      item_type: item.itemStack.type
+      item_amount: item.itemStack.amount
+    jobs:
+      announce:
+        time: 0
+        commands:
+          - '[MESSAGE] Picked up {event.item.itemStack.amount} {item_type}'
+```
+
+`{event.<path>}` reads a chain of public zero-argument `getX()`/`isX()`
+getters; numeric `[index]` access works for lists and arrays. The `placeholders`
+section maps convenient names to the same paths. SRV-Cron infers a unique Player
+and World from event getters; set `context.player` or `context.world` when an
+event has multiple candidates or uses a custom property. Values are snapshotted
+when the event fires, so delayed jobs use the original event data. The existing
+`event-jobs` configuration and BungeeCord join/quit events remain supported.
+
 ### Time Expression Syntax
 
 SRV-Cron supports the original DSL and a broader syntax for readability and advanced use-cases.

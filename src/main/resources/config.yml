@@ -96,6 +96,23 @@ event-jobs:
       time: 0
       commands:
         - "<ALL> [TEXT (PERM:staff.notify.gamemode)] Player {player_name} changed his gamemode from {from_gamemode} to {to_gamemode}"
+# Listen to any Bukkit/Paper Event class (including enabled plugin events):
+# generic-event-jobs:
+#   item-pickup:
+#     event: org.bukkit.event.player.PlayerAttemptPickupItemEvent
+#     priority: NORMAL
+#     ignore-cancelled: false
+#     context:
+#       player: player
+#       world: player.world
+#     placeholders:
+#       item_type: item.itemStack.type
+#       item_amount: item.itemStack.amount
+#     jobs:
+#       announce:
+#         time: 0
+#         commands:
+#           - '[MESSAGE] Picked up {event.item.itemStack.amount} {item_type}'
 startup:
   commands:
     - say Server was started!

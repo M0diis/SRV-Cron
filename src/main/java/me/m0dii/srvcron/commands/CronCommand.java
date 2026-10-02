@@ -3,7 +3,9 @@ package me.m0dii.srvcron.commands;
 import me.m0dii.srvcron.SRVCron;
 import me.m0dii.srvcron.job.CronJob;
 import me.m0dii.srvcron.job.EventJob;
+import me.m0dii.srvcron.managers.GenericEventDefinition;
 import me.m0dii.srvcron.managers.CronJobDispatchEvent;
+import me.m0dii.srvcron.utils.EventPropertyResolver;
 import me.m0dii.srvcron.utils.LangConfig;
 import me.m0dii.srvcron.utils.ScheduleCalculator;
 import me.m0dii.srvcron.utils.TextTransformer;
@@ -17,7 +19,9 @@ import org.bukkit.entity.Player;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CronCommand implements CommandExecutor, TabCompleter {
     private final SRVCron srvCron;
@@ -119,25 +123,33 @@ public class CronCommand implements CommandExecutor, TabCompleter {
             for (CronJob j : srvCron.getJobs().values()) {
                 j.suspend();
             }
+            for (EventJob job : srvCron.getAllEventJobs()) {
+                job.suspend();
+            }
 
             sendf(sender, langCfg.getSuspendedAll());
 
             return;
         }
 
-        if (!srvCron.getJobs().containsKey(args[1])) {
-            sendf(sender, langCfg.getJobDoesNotExist().replace("{job}", args[1]));
-
+        CronJob cronJob = srvCron.getJobs().get(args[1]);
+        if (cronJob != null) {
+            if (cronJob.isSuspended()) {
+                sendf(sender, langCfg.getJobIsSuspended().replace("{job}", args[1]));
+            } else {
+                cronJob.suspend();
+                sendf(sender, langCfg.getJobSuspended().replace("{job}", args[1]));
+            }
             return;
         }
 
-        CronJob j = srvCron.getJobs().get(args[1]);
-
-        if (j.isSuspended()) {
+        EventJob eventJob = findEventJob(args[1]);
+        if (eventJob == null) {
+            sendf(sender, langCfg.getJobDoesNotExist().replace("{job}", args[1]));
+        } else if (eventJob.isSuspended()) {
             sendf(sender, langCfg.getJobIsSuspended().replace("{job}", args[1]));
         } else {
-            j.suspend();
-
+            eventJob.suspend();
             sendf(sender, langCfg.getJobSuspended().replace("{job}", args[1]));
         }
     }
@@ -162,17 +174,7 @@ public class CronCommand implements CommandExecutor, TabCompleter {
                 return;
             }
 
-            EventJob job = null;
-
-            for (List<EventJob> l : srvCron.getEventJobs().values()) {
-                for (EventJob ej : l) {
-                    if (ej.getName().equalsIgnoreCase(args[2])) {
-                        job = ej;
-
-                        break;
-                    }
-                }
-            }
+            EventJob job = findEventJob(args[2]);
 
             if (job == null) {
                 sendf(sender, langCfg.getJobDoesNotExist().replace("{job}", args[2]));
@@ -180,21 +182,26 @@ public class CronCommand implements CommandExecutor, TabCompleter {
                 return;
             }
 
-            for (String cmd : job.getCommands()) {
-                if (cmd.toUpperCase().startsWith("<ALL>")) {
-                    cmd = cmd.replace("<ALL>", "");
-
-                    for (Player p : Bukkit.getOnlinePlayers()) {
-                        Utils.sendCommand(p, cmd);
+            Player playerSender = sender instanceof Player player ? player : null;
+            Map<String, String> placeholders = manualEventPlaceholders(job, playerSender);
+            for (String originalCommand : job.getCommands()) {
+                String command = playerSender == null ? originalCommand
+                        : Utils.handleDispatcherPlaceholders(originalCommand, playerSender, placeholders.keySet());
+                if (command.toUpperCase().startsWith("<ALL+>")) {
+                    command = command.substring("<ALL+>".length());
+                    for (Player recipient : Bukkit.getOnlinePlayers()) {
+                        Utils.sendCommand(recipient, command, placeholders);
+                    }
+                } else if (command.toUpperCase().startsWith("<ALL>")) {
+                    command = command.substring("<ALL>".length());
+                    for (Player recipient : Bukkit.getOnlinePlayers()) {
+                        if (playerSender == null || !recipient.getUniqueId().equals(playerSender.getUniqueId())) {
+                            Utils.sendCommand(recipient, command, placeholders);
+                        }
                     }
                 } else {
-                    if (sender instanceof Player playerSender) {
-                        Utils.sendCommand(playerSender, cmd);
-                    } else {
-                        Utils.sendCommand(null, cmd);
-                    }
+                    Utils.sendCommand(playerSender, command, placeholders);
                 }
-
             }
 
             srvCron.log("Manually running Event Job " + job.getName() + " by " + sender.getName());
@@ -229,18 +236,17 @@ public class CronCommand implements CommandExecutor, TabCompleter {
         if (args.length == 2) {
             if (args[1].equalsIgnoreCase("events")) {
                 sendf(sender, "&8&m----------------------------------");
-                sendf(sender, "&7EVENT JOBS &8(&7" + srvCron.getEventJobs().size() + "&8)");
+                List<EventJob> eventJobs = srvCron.getAllEventJobs();
+                sendf(sender, "&7EVENT JOBS &8(&7" + eventJobs.size() + "&8)");
                 sendf(sender, "&8&m----------------------------------");
 
                 int id = 1;
 
-                for (List<EventJob> eventJobs : srvCron.getEventJobs().values()) {
-                    for (EventJob job : eventJobs) {
-                        sendf(sender, String.format("&8#&7%d. &a%s &8(&7%s&8) &2%d commands;", id,
-                                job.getName().toLowerCase(), job.getEventType().getConfigName(), job.getCommands().size()));
-
-                        id++;
-                    }
+                for (EventJob job : eventJobs) {
+                    String suspended = job.isSuspended() ? " &4[&cS&4]" : "";
+                    sendf(sender, String.format("&8#&7%d. &a%s &8(&7%s&8)%s &2%d commands;", id,
+                            job.getName().toLowerCase(), job.getEventIdentifier(), suspended, job.getCommands().size()));
+                    id++;
                 }
 
                 return;
@@ -282,26 +288,34 @@ public class CronCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
-        if (!srvCron.getJobs().containsKey(args[1])) {
+        CronJob cronJob = srvCron.getJobs().get(args[1]);
+        EventJob eventJob = cronJob == null ? findEventJob(args[1]) : null;
+        if (cronJob == null && eventJob == null) {
             sendf(sender, langCfg.getJobDoesNotExist().replace("{job}", args[1]));
-
             return;
         }
-
-        CronJob j = srvCron.getJobs().get(args[1]);
 
         sendf(sender, "&8&m----------------------------------");
         sendf(sender, "&7JOB INFORMATION");
         sendf(sender, "&8&m----------------------------------");
-
-        sendf(sender, "&8Job name: &7" + j.getName());
-        sendf(sender, "&8Time: &7" + j.getTime());
-        sendf(sender, "&8Run count: &7" + j.getRunCount());
-        sendf(sender, "&8Suspended: &7" + j.isSuspended());
-        sendf(sender, "&8Commands: ");
-
-        for (String s : j.getCommands()) {
-            sendf(sender, "&8- &7" + s);
+        if (cronJob != null) {
+            sendf(sender, "&8Job name: &7" + cronJob.getName());
+            sendf(sender, "&8Time: &7" + cronJob.getTime());
+            sendf(sender, "&8Run count: &7" + cronJob.getRunCount());
+            sendf(sender, "&8Suspended: &7" + cronJob.isSuspended());
+            sendf(sender, "&8Commands: ");
+            for (String s : cronJob.getCommands()) {
+                sendf(sender, "&8- &7" + s);
+            }
+        } else {
+            sendf(sender, "&8Job name: &7" + eventJob.getName());
+            sendf(sender, "&8Event: &7" + eventJob.getEventIdentifier());
+            sendf(sender, "&8Run count: &7" + eventJob.getRunCount());
+            sendf(sender, "&8Suspended: &7" + eventJob.isSuspended());
+            sendf(sender, "&8Commands: ");
+            for (String s : eventJob.getCommands()) {
+                sendf(sender, "&8- &7" + s);
+            }
         }
 
         sendf(sender, "&8&m----------------------------------");
@@ -324,25 +338,33 @@ public class CronCommand implements CommandExecutor, TabCompleter {
             for (CronJob j : srvCron.getJobs().values()) {
                 j.resume();
             }
+            for (EventJob job : srvCron.getAllEventJobs()) {
+                job.resume();
+            }
 
             sendf(sender, langCfg.getResumedAll());
 
             return;
         }
 
-        if (!srvCron.getJobs().containsKey(args[1])) {
-            sendf(sender, langCfg.getJobDoesNotExist().replace("{job}", args[1]));
-
+        CronJob cronJob = srvCron.getJobs().get(args[1]);
+        if (cronJob != null) {
+            if (!cronJob.isSuspended()) {
+                sendf(sender, langCfg.getJobNotSuspended().replace("{job}", args[1]));
+            } else {
+                cronJob.resume();
+                sendf(sender, langCfg.getJobResumed().replace("{job}", args[1]));
+            }
             return;
         }
 
-        CronJob j = srvCron.getJobs().get(args[1]);
-
-        if (!j.isSuspended()) {
+        EventJob eventJob = findEventJob(args[1]);
+        if (eventJob == null) {
+            sendf(sender, langCfg.getJobDoesNotExist().replace("{job}", args[1]));
+        } else if (!eventJob.isSuspended()) {
             sendf(sender, langCfg.getJobNotSuspended().replace("{job}", args[1]));
         } else {
-            j.resume();
-
+            eventJob.resume();
             sendf(sender, langCfg.getJobResumed().replace("{job}", args[1]));
         }
     }
@@ -468,6 +490,7 @@ public class CronCommand implements CommandExecutor, TabCompleter {
 
         if (args.length == 2 && args[0].equalsIgnoreCase("jobinfo")) {
             completes.addAll(srvCron.getJobs().keySet());
+            srvCron.getAllEventJobs().stream().map(EventJob::getName).forEach(completes::add);
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("checkschedule")) {
@@ -480,6 +503,8 @@ public class CronCommand implements CommandExecutor, TabCompleter {
                     completes.add(j.getName());
                 }
             }
+            srvCron.getAllEventJobs().stream().filter(job -> !job.isSuspended())
+                    .map(EventJob::getName).forEach(completes::add);
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("resume")) {
@@ -488,15 +513,13 @@ public class CronCommand implements CommandExecutor, TabCompleter {
                     completes.add(j.getName());
                 }
             }
+            srvCron.getAllEventJobs().stream().filter(EventJob::isSuspended)
+                    .map(EventJob::getName).forEach(completes::add);
         }
 
         if (args.length == 3 && args[0].equalsIgnoreCase("run")
                 && args[1].equalsIgnoreCase("event")) {
-            for (List<EventJob> list : srvCron.getEventJobs().values()) {
-                for (EventJob job : list) {
-                    completes.add(job.getName());
-                }
-            }
+            srvCron.getAllEventJobs().stream().map(EventJob::getName).forEach(completes::add);
         }
 
         if (args.length == 3 && args[0].equalsIgnoreCase("checkschedule")) {
@@ -512,5 +535,28 @@ public class CronCommand implements CommandExecutor, TabCompleter {
         }
 
         return completes;
+    }
+
+    private EventJob findEventJob(String name) {
+        return srvCron.getAllEventJobs().stream()
+                .filter(job -> job.getName().equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
+    }
+
+    private Map<String, String> manualEventPlaceholders(EventJob job, Player player) {
+        Map<String, String> values = new LinkedHashMap<>();
+        if (job.getEventClass() != null) {
+            GenericEventDefinition definition = srvCron.getGenericEventDefinitions().get(job.getEventIdentifier());
+            if (definition != null) {
+                values.putAll(EventPropertyResolver.capture(null, definition.getPlayerPath(), definition.getWorldPath(),
+                        definition.getPlaceholderPaths(), job.getCommands()).getPlaceholders());
+            }
+        }
+        if (player != null) {
+            values.put("player_name", player.getName());
+            values.put("world_name", player.getWorld().getName());
+        }
+        return values;
     }
 }

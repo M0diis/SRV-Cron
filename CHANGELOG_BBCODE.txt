@@ -1,3 +1,7 @@
+[b]2.14.0[/b]
+[list]
+[*]Added configurable Paper/Bukkit event jobs with event property placeholders, player/world context, and priority/cancellation settings.
+[/list]
 [b]2.13.0[/b]
 [list]
 [*]Added message, title, action bar, sound, particle, broadcast, logging, and player or console command actions.

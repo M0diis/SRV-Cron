@@ -11,7 +11,7 @@ tasks.withType<JavaCompile> {
 }
 
 group = "me.m0dii"
-version = "2.13.0"
+version = "2.14.0"
 val pluginVersion = project.version.toString()
 
 java {
@@ -59,8 +59,11 @@ dependencies {
     compileOnly("org.projectlombok:lombok:1.18.46")
     annotationProcessor("org.projectlombok:lombok:1.18.46")
 
-    testImplementation(platform("org.junit:junit-bom:5.11.4"))
+    testImplementation(platform("org.junit:junit-bom:6.1.3"))
     testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.mockbukkit.mockbukkit:mockbukkit-v26.2:4.116.1")
+    testImplementation("io.papermc.paper:paper-api:26.2.build.129-stable")
 }
 
 tasks {

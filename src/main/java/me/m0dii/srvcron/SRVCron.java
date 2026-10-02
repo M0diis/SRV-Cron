@@ -6,6 +6,7 @@ import me.m0dii.srvcron.commands.TimerCommand;
 import me.m0dii.srvcron.job.CronJob;
 import me.m0dii.srvcron.job.EventJob;
 import me.m0dii.srvcron.managers.EventManager;
+import me.m0dii.srvcron.managers.GenericEventDefinition;
 import me.m0dii.srvcron.managers.StartupCommandDispatchEvent;
 import me.m0dii.srvcron.utils.*;
 import org.bstats.bukkit.Metrics;
@@ -13,6 +14,9 @@ import org.bstats.charts.SingleLineChart;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.*;
@@ -24,6 +28,10 @@ public class SRVCron extends JavaPlugin {
     @Getter
     private final Map<EventType, List<EventJob>> eventJobs = new HashMap<>();
     @Getter
+    private final Map<String, List<EventJob>> genericEventJobs = new LinkedHashMap<>();
+    @Getter
+    private final Map<String, GenericEventDefinition> genericEventDefinitions = new LinkedHashMap<>();
+    @Getter
     private final List<String> startUpCommands = new ArrayList<>();
 
     @Getter
@@ -34,6 +42,8 @@ public class SRVCron extends JavaPlugin {
 
     @Getter
     private LangConfig langCfg;
+
+    private EventManager eventManager;
 
     @Override
     public void onEnable() {
@@ -66,7 +76,7 @@ public class SRVCron extends JavaPlugin {
         logStartup("Finished loading jobs.");
 
         logStartup("Creating Event Managers...");
-        new EventManager(this);
+        eventManager = new EventManager(this);
         logStartup("Finished loading Event Managers.");
 
         logStartup("Loading metrics...");
@@ -113,7 +123,7 @@ public class SRVCron extends JavaPlugin {
         metrics.addCustomChart(new SingleLineChart("running_jobs", jobs::size));
 
         metrics.addCustomChart(new SingleLineChart("running_event_jobs", () ->
-                Arrays.stream(EventType.values()).filter(eventJobs::containsKey).mapToInt(type -> eventJobs.get(type).size()).sum()
+                getAllEventJobs().size()
         ));
 
         metrics.addCustomChart(new SingleLineChart("running_startup_commands", startUpCommands::size));
@@ -131,6 +141,8 @@ public class SRVCron extends JavaPlugin {
 
         jobs.clear();
         eventJobs.clear();
+        genericEventJobs.clear();
+        genericEventDefinitions.clear();
         startUpCommands.clear();
 
         ConfigurationSection jobsSection = getConfig().getConfigurationSection("jobs");
@@ -195,6 +207,8 @@ public class SRVCron extends JavaPlugin {
             log("Configuration section with event jobs was not found.");
         }
 
+        loadGenericEventJobs();
+
         List<String> cmds = getConfig().getStringList("startup.commands");
 
         if (cmds == null || cmds.isEmpty()) {
@@ -208,6 +222,137 @@ public class SRVCron extends JavaPlugin {
 
             logStartup("Startup commands have been registered.");
         }
+
+        if (eventManager != null) {
+            eventManager.refreshEventRegistrations();
+        }
+    }
+
+    private void loadGenericEventJobs() {
+        ConfigurationSection definitions = getConfig().getConfigurationSection("generic-event-jobs");
+        if (definitions == null) {
+            return;
+        }
+
+        for (String id : definitions.getKeys(false)) {
+            String path = "generic-event-jobs." + id;
+            String className = getConfig().getString(path + ".event", "").trim();
+            Class<? extends Event> eventClass = resolveEventClass(className);
+            if (eventClass == null) {
+                log("Skipping generic event '" + id + "': event class '" + className + "' could not be resolved or is not a supported Bukkit event.");
+                continue;
+            }
+
+            EventPriority priority;
+            try {
+                priority = EventPriority.valueOf(getConfig().getString(path + ".priority", "NORMAL").trim().toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException ex) {
+                log("Skipping generic event '" + id + "': invalid priority '" + getConfig().getString(path + ".priority") + "'.");
+                continue;
+            }
+
+            Map<String, String> placeholderPaths = new LinkedHashMap<>();
+            ConfigurationSection placeholders = getConfig().getConfigurationSection(path + ".placeholders");
+            if (placeholders != null) {
+                for (String alias : placeholders.getKeys(false)) {
+                    String propertyPath = placeholders.getString(alias, "").trim();
+                    if (!alias.matches("[A-Za-z0-9_-]+") || alias.equalsIgnoreCase("player_name")
+                            || alias.equalsIgnoreCase("world_name") || alias.equalsIgnoreCase("event")) {
+                        log("Ignoring invalid or reserved event placeholder alias '" + alias + "' in '" + id + "'.");
+                        continue;
+                    }
+                    if (!propertyPath.isBlank()) {
+                        placeholderPaths.put(alias, propertyPath);
+                    }
+                }
+            }
+
+            ConfigurationSection configuredJobs = getConfig().getConfigurationSection(path + ".jobs");
+            if (configuredJobs == null) {
+                log("Skipping generic event '" + id + "': missing jobs section.");
+                continue;
+            }
+
+            List<EventJob> loadedJobs = new ArrayList<>();
+            for (String name : configuredJobs.getKeys(false)) {
+                String jobPath = path + ".jobs." + name;
+                int time = getConfig().getInt(jobPath + ".time", 0);
+                List<String> commands = getConfig().getStringList(jobPath + ".commands");
+                EventJob job = new EventJob(this, name, time, commands, id, eventClass);
+                loadedJobs.add(job);
+                logStartup("Created generic event job: " + name + " (" + id + ": " + className + ")");
+            }
+
+            String playerPath = getConfig().getString(path + ".context.player", "");
+            String worldPath = getConfig().getString(path + ".context.world", "");
+            GenericEventDefinition definition = new GenericEventDefinition(
+                    id,
+                    eventClass,
+                    priority,
+                    getConfig().getBoolean(path + ".ignore-cancelled", false),
+                    playerPath,
+                    worldPath,
+                    placeholderPaths,
+                    loadedJobs
+            );
+            genericEventDefinitions.put(id, definition);
+            genericEventJobs.put(id, loadedJobs);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Class<? extends Event> resolveEventClass(String className) {
+        if (className == null || className.isBlank()) {
+            return null;
+        }
+
+        Set<ClassLoader> classLoaders = new LinkedHashSet<>();
+        classLoaders.add(getClass().getClassLoader());
+        for (org.bukkit.plugin.Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
+            classLoaders.add(plugin.getClass().getClassLoader());
+        }
+
+        for (ClassLoader classLoader : classLoaders) {
+            try {
+                Class<?> candidate = Class.forName(className, false, classLoader);
+                if (!Event.class.isAssignableFrom(candidate)) {
+                    continue;
+                }
+                var handlerList = candidate.getDeclaredMethod("getHandlerList");
+                if (!java.lang.reflect.Modifier.isStatic(handlerList.getModifiers())
+                        || !HandlerList.class.isAssignableFrom(handlerList.getReturnType())) {
+                    continue;
+                }
+                var handlers = candidate.getMethod("getHandlers");
+                if (java.lang.reflect.Modifier.isStatic(handlers.getModifiers())
+                        || !HandlerList.class.isAssignableFrom(handlers.getReturnType())) {
+                    continue;
+                }
+                return (Class<? extends Event>) candidate;
+            } catch (ClassNotFoundException | NoSuchMethodException | LinkageError | SecurityException ignored) {
+                // Try the classloader belonging to another enabled plugin.
+            }
+        }
+        return null;
+    }
+
+    public List<EventJob> getAllEventJobs() {
+        List<EventJob> allJobs = new ArrayList<>();
+        eventJobs.values().forEach(allJobs::addAll);
+        genericEventJobs.values().forEach(allJobs::addAll);
+        return allJobs;
+    }
+
+    public List<EventJob> getEventJobsByIdentifier(String identifier) {
+        List<EventJob> genericJobs = genericEventJobs.get(identifier);
+        if (genericJobs != null) {
+            return genericJobs;
+        }
+        EventType legacyType = EventType.isEventJob(identifier);
+        if (legacyType != null) {
+            return eventJobs.getOrDefault(legacyType, List.of());
+        }
+        return List.of();
     }
 
     private void applyScheduleSettings() {

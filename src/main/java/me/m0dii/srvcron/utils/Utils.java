@@ -2,6 +2,8 @@ package me.m0dii.srvcron.utils;
 
 import me.clip.placeholderapi.PlaceholderAPI;
 import me.m0dii.srvcron.SRVCron;
+import me.m0dii.srvcron.job.EventJobContext;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -12,6 +14,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Utils {
@@ -32,22 +35,30 @@ public class Utils {
     }
 
     public static String handleDispatcherPlaceholders(String str, Player p) {
-        StringBuilder result = new StringBuilder();
+        return handleDispatcherPlaceholders(str, p, Set.of());
+    }
 
-        String[] split = str.replaceAll("\\{player_name}", p.getName()).split(" ");
-
-        for (String s : split) {
-            if (s.startsWith("{") && s.endsWith("}")) {
-                String placeholder = s.replaceAll("[{}]", "%");
-                result.append(applyPlaceholderApi(p, placeholder));
-            } else {
-                result.append(s);
-            }
-
-            result.append(" ");
+    public static String handleDispatcherPlaceholders(String str, Player p, Set<String> eventPlaceholders) {
+        if (p == null) {
+            return str;
         }
 
-        return result.toString().trim();
+        Pattern pattern = Pattern.compile("\\{([^{}]+)}");
+        Matcher matcher = pattern.matcher(str);
+        StringBuilder result = new StringBuilder(str.length());
+        int lastEnd = 0;
+        while (matcher.find()) {
+            result.append(str, lastEnd, matcher.start());
+            String placeholder = matcher.group(1).trim();
+            if (placeholder.startsWith("IF:") || eventPlaceholders.contains(placeholder)) {
+                result.append(matcher.group());
+            } else {
+                result.append(applyPlaceholderApi(p, "%" + placeholder + "%"));
+            }
+            lastEnd = matcher.end();
+        }
+        result.append(str, lastEnd, str.length());
+        return result.toString();
     }
 
     public static String setPlaceholders(String str, Player p) {
@@ -136,8 +147,21 @@ public class Utils {
     }
 
     public static void sendCommand(Player onlinePlayer, String cmd) {
+        sendCommand(onlinePlayer, cmd, Map.of());
+    }
+
+    public static void sendCommand(Player onlinePlayer, String cmd, Map<String, String> eventPlaceholders) {
+        sendCommand(onlinePlayer, cmd, eventPlaceholders, Map.of());
+    }
+
+    public static void sendCommand(Player onlinePlayer, String cmd, EventJobContext context) {
+        sendCommand(onlinePlayer, cmd, context.getPlaceholders(), context.getComponentPlaceholders());
+    }
+
+    public static void sendCommand(Player onlinePlayer, String cmd, Map<String, String> eventPlaceholders,
+                                   Map<String, Component> componentPlaceholders) {
         debug("Dispatching command: " + cmd);
-        CommandActionParser.parse(onlinePlayer, cmd);
+        CommandActionParser.parse(onlinePlayer, cmd, eventPlaceholders, componentPlaceholders);
     }
 
     public static void debug(String message) {
